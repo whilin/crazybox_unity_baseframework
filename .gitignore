@@ -1,0 +1,17 @@
+IOSBuild/
+Logs/
+.vs/
+.vscode/
+removed_assets/
+Temp/
+obj/
+Library/
+
+*.csproj
+*.sln
+.vsconfig
+android/.gradle
+android/.idea
+Removed
+.plastic
+Build

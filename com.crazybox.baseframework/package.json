@@ -1,0 +1,16 @@
+{
+  "name": "com.crazybox.baseframework",
+  "version": "1.0.0",
+  "displayName": "0. Jongok's Framework Package",
+  "description": "Jongok's Framework",
+  "keywords": [
+    "keyword1",
+    "keyword2",
+    "keyword3"
+  ],
+  "author": {
+    "name": "Jongok",
+    "email": "e.jongok@gmail.com",
+    "url": ""
+  }
+}
