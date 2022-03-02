@@ -492,11 +492,6 @@ public class DatabaseManager : MonoSingleton<DatabaseManager>
 #if UNITY_WEBGL || UNITY_SERVER
             string dbpath = "";
             throw new Exception("cxSQLDatabase not supported in webgl");
-#elif UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
-            string dbpath = "file://" + Application.streamingAssetsPath + "/" + dbfilename;
-            WWW www = new WWW(dbpath);
-            yield return www;
-            bytes = www.bytes;
 #elif UNITY_IPHONE
 			string dbpath = Application.dataPath + "/Raw/" + dbfilename;
             try
@@ -516,6 +511,11 @@ public class DatabaseManager : MonoSingleton<DatabaseManager>
 			WWW www = new WWW(dbpath);
             yield return www;
 			bytes = www.bytes;
+#else // UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
+            string dbpath = "file://" + Application.streamingAssetsPath + "/" + dbfilename;
+            WWW www = new WWW(dbpath);
+            yield return www;
+            bytes = www.bytes;
 #endif
             if (bytes != null)
             {
