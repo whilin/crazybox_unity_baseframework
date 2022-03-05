@@ -16,7 +16,7 @@ public class BundleBuiler : MonoBehaviour {
 #if (UNITY_ANDROID)
                 buildTarget = BuildTarget.Android;
 #elif (UNITY_IOS)
-                buildTarget = BuildTarget.StandaloneOSXUniversal;
+                buildTarget = BuildTarget.StandaloneOSX;
 #elif UNITY_WEBGL
                 buildTarget = BuildTarget.WebGL;
 #else 
