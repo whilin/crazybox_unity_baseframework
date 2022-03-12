@@ -16,16 +16,16 @@ public class BundleBuiler : MonoBehaviour {
 #if (UNITY_ANDROID)
                 buildTarget = BuildTarget.Android;
 #elif (UNITY_IOS)
-                buildTarget = BuildTarget.StandaloneOSX;
+                buildTarget = BuildTarget.iOS;
 #elif UNITY_WEBGL
                 buildTarget = BuildTarget.WebGL;
 #else 
                 buildTarget = BuildTarget.StandaloneLinux64;
 #endif
-                BuildAllAssetBundles (buildTarget);
+                BuildAllAssetBundle (buildTarget);
         }
 
-        public static void BuildAllAssetBundles (BuildTarget buildTarget) {
+        public static void BuildAllAssetBundle (BuildTarget buildTarget) {
                 AssetBundleManifest manifest;
 
                 string platformName = buildTarget.ToString ();

@@ -15,7 +15,7 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
     [SerializeField]
     private bool useEditorAssets = false;
 
-    public bool Ready { get; private set; }= false;
+    public bool Ready { get; private set; } = false;
     //public string bundleEditorPath;
 
     private List<AssetBundleDesc> bundleTable = new List<AssetBundleDesc> ();
@@ -43,12 +43,19 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
         else
             LoadBundleTable ();
 
-       
     }
 
     AssetBundleDesc FindSceneBundleDesc (string sceneName) {
         var sceneFileName = sceneName + ".unity";
-        var desc = bundleTable.Find (q => q.scenes.Find (s => s.EndsWith (sceneFileName)) != null);
+        var desc = bundleTable.Find (q => q.scenes.Exists (s => s.EndsWith (sceneFileName)));
+        return desc;
+    }
+
+    AssetBundleDesc FindObjectBundleDesc (string objName) {
+        var desc = bundleTable.Find (q => q.assets.Exists ((s) => {
+            var file = Path.GetFileNameWithoutExtension(s);
+            return string.Equals (file, objName, StringComparison.OrdinalIgnoreCase);
+        }));
         return desc;
     }
 
@@ -62,11 +69,23 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
         }
     }
 
+    public AssetBundle FindBundle (string bundleName) {
+        return bundles.Find (q => q.name == bundleName);
+    }
+
+    public async Task LoadAllBundles (Action<float> downloadState) {
+        downloadState (0);
+        foreach (var bundleDesc in bundleTable) {
+            var bundle = await LoadBundle (bundleDesc.bundle, bundleDesc.hash, downloadState);
+            bundles.Add (bundle);
+        }
+    }
+
     public async Task LoadSceneBundle (string sceneName, Action<float> downloadState = null) {
 
         var bundleDesc = FindSceneBundleDesc (sceneName);
         if (bundleDesc != null) {
-        
+
             var find = bundles.Find (q => q.name == bundleDesc.bundle);
 
             if (find == null) {
@@ -75,7 +94,7 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
                 else
                     find = await LoadBundle (bundleDesc.bundle, bundleDesc.hash, downloadState);
 
-                if(find !=null)
+                if (find != null)
                     bundles.Add (find);
             }
 
@@ -95,7 +114,7 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
                 bundleTable = Newtonsoft.Json.JsonConvert.DeserializeObject<List<AssetBundleDesc>> (json);
             }
 
-             Ready = true;
+            Ready = true;
         } catch (Exception ex) {
             Debug.LogException (ex);
         }
@@ -123,7 +142,7 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
         return bundle;
     }
 
-    async Task<AssetBundle> LoadBundle (string bundleName, string hash,  Action<float> downloadState = null) {
+    async Task<AssetBundle> LoadBundle (string bundleName, string hash, Action<float> downloadState = null) {
         string uri = $"{bundleBaseURL}/{platformName}/{bundleName}";
 
         try {
@@ -142,9 +161,9 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
 
             return bundle;
         } catch (Exception ex) {
-            Debug.LogException(ex);
+            Debug.LogException (ex);
             throw ex;
-           // return null;
+            // return null;
         }
     }
 }
