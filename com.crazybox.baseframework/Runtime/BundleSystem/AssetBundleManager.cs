@@ -24,9 +24,9 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
 
     private void Start () {
 
-#if !UNITY_EDITOR
-        useEditorAssets = false;
-#endif
+// #if !UNITY_EDITOR
+//         useEditorAssets = false;
+// #endif
 
 #if UNITY_ANDROID
         platformName = "Android";
