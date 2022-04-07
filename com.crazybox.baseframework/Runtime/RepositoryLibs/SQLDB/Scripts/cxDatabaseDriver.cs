@@ -50,8 +50,9 @@ public class cxDatabaseDriver
             string dbpath = "";
             throw new Exception("cxSQLDatabase not supported in webgl");
 
-#elif UNITY_IPHONE
-			string dbpath = Application.dataPath + "/Raw/" + dbfilename;
+#elif UNITY_IPHONE && !UNITY_EDITOR
+            string dbpath =  Path.Combine(Application.streamingAssetsPath, dbfilename);
+			//string dbpath = Application.dataPath + "/Raw/" + dbfilename;
             try
             {
 			    using ( FileStream fs = new FileStream(dbpath, FileMode.Open, FileAccess.Read, FileShare.Read) )
@@ -64,7 +65,7 @@ public class cxDatabaseDriver
 			{
 				Debug.Log("DB Create failed :" + e.ToString());
 			}
-#elif UNITY_ANDROID
+#elif UNITY_ANDROID && !UNITY_EDITOR
 			string dbpath = Application.streamingAssetsPath + "/" + dbfilename;	            
 			WWW www = new WWW(dbpath);
             await www;

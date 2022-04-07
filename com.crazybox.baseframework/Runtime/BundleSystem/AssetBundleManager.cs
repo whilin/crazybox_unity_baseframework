@@ -10,11 +10,22 @@ using UnityEngine.SceneManagement;
 
 public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
 
+    public enum LoadOption {
+        FromBuildSetting,
+        FromLocalBundles,
+        FromRemoteBundles
+    }
+ 
+    [SerializeField]
+    private LoadOption loadOption = LoadOption.FromBuildSetting;
+
+
     [SerializeField]
     private string bundleBaseURL;
-    [SerializeField]
-    private bool useEditorAssets = false;
+    // [SerializeField]
+    // private bool useEditorAssets = false;
 
+   
     public bool Ready { get; private set; } = false;
     //public string bundleEditorPath;
 
@@ -24,9 +35,9 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
 
     private void Start () {
 
-// #if !UNITY_EDITOR
-//         useEditorAssets = false;
-// #endif
+        // #if !UNITY_EDITOR
+        //         useEditorAssets = false;
+        // #endif
 
 #if UNITY_ANDROID
         platformName = "Android";
@@ -38,11 +49,12 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
         platformName = "Standalone";
 #endif 
 
-        if (useEditorAssets)
+        if (loadOption == LoadOption.FromLocalBundles)
             LoadBundleTableInEditor ();
-        else
+        else if (loadOption == LoadOption.FromRemoteBundles)
             LoadBundleTable ();
-
+        else
+            Ready = true;
     }
 
     AssetBundleDesc FindSceneBundleDesc (string sceneName) {
@@ -53,13 +65,16 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
 
     AssetBundleDesc FindObjectBundleDesc (string objName) {
         var desc = bundleTable.Find (q => q.assets.Exists ((s) => {
-            var file = Path.GetFileNameWithoutExtension(s);
+            var file = Path.GetFileNameWithoutExtension (s);
             return string.Equals (file, objName, StringComparison.OrdinalIgnoreCase);
         }));
         return desc;
     }
 
     public bool CheckNeedDownload (string sceneName) {
+        if (loadOption == LoadOption.FromBuildSetting)
+            return false;
+
         var bundleDesc = FindSceneBundleDesc (sceneName);
         if (bundleDesc == null) {
             return false;
@@ -70,10 +85,19 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
     }
 
     public AssetBundle FindBundle (string bundleName) {
+        if (loadOption == LoadOption.FromBuildSetting)
+            return null;
+
         return bundles.Find (q => q.name == bundleName);
     }
 
     public async Task LoadAllBundles (Action<float> downloadState) {
+        if (loadOption == LoadOption.FromBuildSetting) {
+            downloadState (0);
+            downloadState (1);
+            return;
+        }
+
         downloadState (0);
         foreach (var bundleDesc in bundleTable) {
             var bundle = await LoadBundle (bundleDesc.bundle, bundleDesc.hash, downloadState);
@@ -82,6 +106,11 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
     }
 
     public async Task LoadSceneBundle (string sceneName, Action<float> downloadState = null) {
+        if (loadOption == LoadOption.FromBuildSetting) {
+            if(downloadState !=null) downloadState (0);
+            if(downloadState !=null) downloadState (1);
+            return;
+        }
 
         var bundleDesc = FindSceneBundleDesc (sceneName);
         if (bundleDesc != null) {
@@ -89,7 +118,7 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
             var find = bundles.Find (q => q.name == bundleDesc.bundle);
 
             if (find == null) {
-                if (useEditorAssets)
+                if (loadOption == LoadOption.FromLocalBundles)
                     find = await LoadBundleInEditor (bundleDesc.bundle, bundleDesc.hash, downloadState);
                 else
                     find = await LoadBundle (bundleDesc.bundle, bundleDesc.hash, downloadState);
