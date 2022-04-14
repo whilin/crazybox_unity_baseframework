@@ -34,13 +34,15 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
     private string platformName;
     
     private void Start () {
-#if UNITY_EDITOR
-        StartWithOption(loadOption);
-#endif
+// #if UNITY_EDITOR
+//         StartWithOption(loadOption);
+// #endif
     }
     
-    public void StartWithOption (LoadOption loadOption) {
+    public void StartWithOption (LoadOption _loadOption) {
 
+        loadOption = _loadOption;
+        
 // #if !UNITY_EDITOR
 //         loadOption = LoadOption.FromRemoteBundles;
 // #endif
