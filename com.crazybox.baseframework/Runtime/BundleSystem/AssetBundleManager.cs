@@ -17,7 +17,7 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
     }
  
     [SerializeField]
-    private LoadOption loadOption = LoadOption.FromBuildSetting;
+    public LoadOption loadOption = LoadOption.FromBuildSetting;
 
 
     [SerializeField]
@@ -32,8 +32,14 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
     private List<AssetBundleDesc> bundleTable = new List<AssetBundleDesc> ();
     private List<AssetBundle> bundles = new List<AssetBundle> ();
     private string platformName;
-
+    
     private void Start () {
+#if UNITY_EDITOR
+        StartWithOption(loadOption);
+#endif
+    }
+    
+    public void StartWithOption (LoadOption loadOption) {
 
 // #if !UNITY_EDITOR
 //         loadOption = LoadOption.FromRemoteBundles;
