@@ -15,37 +15,35 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
         FromLocalBundles,
         FromRemoteBundles
     }
- 
+
     [SerializeField]
     public LoadOption loadOption = LoadOption.FromBuildSetting;
-
 
     [SerializeField]
     private string bundleBaseURL;
     // [SerializeField]
     // private bool useEditorAssets = false;
 
-   
     public bool Ready { get; private set; } = false;
     //public string bundleEditorPath;
 
     private List<AssetBundleDesc> bundleTable = new List<AssetBundleDesc> ();
     private List<AssetBundle> bundles = new List<AssetBundle> ();
     private string platformName;
-    
+
     private void Start () {
-// #if UNITY_EDITOR
-//         StartWithOption(loadOption);
-// #endif
+        // #if UNITY_EDITOR
+        //         StartWithOption(loadOption);
+        // #endif
     }
-    
+
     public void StartWithOption (LoadOption _loadOption) {
 
         loadOption = _loadOption;
-        
-// #if !UNITY_EDITOR
-//         loadOption = LoadOption.FromRemoteBundles;
-// #endif
+
+        // #if !UNITY_EDITOR
+        //         loadOption = LoadOption.FromRemoteBundles;
+        // #endif
 
 #if UNITY_ANDROID
         platformName = "Android";
@@ -108,15 +106,31 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
 
         downloadState (0);
         foreach (var bundleDesc in bundleTable) {
-            var bundle = await LoadBundle (bundleDesc.bundle, bundleDesc.hash, downloadState);
-            bundles.Add (bundle);
+
+            try {
+                Debug.LogFormat ("LoadAllBundles {0} Load begin", bundleDesc.bundle);
+
+                AssetBundle bundle;
+
+                if (loadOption == LoadOption.FromLocalBundles)
+                    bundle = await LoadBundleInEditor (bundleDesc.bundle, bundleDesc.hash, downloadState);
+                else
+                    bundle = await LoadBundle (bundleDesc.bundle, bundleDesc.hash, downloadState);
+
+                bundles.Add (bundle);
+                Debug.LogFormat ("LoadAllBundles {0} Load completed", bundleDesc.bundle);
+            } catch (Exception ex) {
+                Debug.LogErrorFormat ("LoadAllBundles {0} Load failed ex:{1}", bundleDesc.bundle, ex.Message);
+            }
         }
+
+         downloadState (1);
     }
 
     public async Task LoadSceneBundle (string sceneName, Action<float> downloadState = null) {
         if (loadOption == LoadOption.FromBuildSetting) {
-            if(downloadState !=null) downloadState (0);
-            if(downloadState !=null) downloadState (1);
+            if (downloadState != null) downloadState (0);
+            if (downloadState != null) downloadState (1);
             return;
         }
 
@@ -154,6 +168,7 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
             Ready = true;
         } catch (Exception ex) {
             Debug.LogException (ex);
+            throw ex;
         }
     }
 
@@ -168,6 +183,7 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
             Ready = true;
         } catch (Exception ex) {
             Debug.LogException (ex);
+            throw ex;
         }
     }
 

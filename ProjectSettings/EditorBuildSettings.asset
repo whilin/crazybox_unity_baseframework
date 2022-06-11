@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Sample.unity
     guid: 1af105be0eef947ea82a5f156fcde8eb
+  - enabled: 0
+    path: Assets/StreamChat/SampleProject/Scenes/ChatDemo.unity
+    guid: f2b330197c3b8144b93a264ca0f95bd2
   m_configObjects: {}
