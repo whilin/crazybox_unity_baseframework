@@ -178,6 +178,10 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
             UnityWebRequest req = UnityWebRequest.Get (url);
             await req.SendWebRequest ();
 
+            if( req.result != UnityWebRequest.Result.Success){
+                throw new Exception("Load Bundle Table failed");
+            }
+
             var json = req.downloadHandler.text;
             bundleTable = Newtonsoft.Json.JsonConvert.DeserializeObject<List<AssetBundleDesc>> (json);
             Ready = true;
@@ -201,10 +205,15 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
         try {
             var req = UnityWebRequestAssetBundle.GetAssetBundle (uri, Hash128.Parse (hash));
             var asyncOp = req.SendWebRequest ();
-            while (!asyncOp.isDone) {
+
+            while (!asyncOp.isDone && req.result == UnityWebRequest.Result.InProgress) {
                 if (downloadState != null)
                     downloadState (req.downloadProgress);
                 await new WaitForEndOfFrame ();
+            }
+
+            if(req.result != UnityWebRequest.Result.Success) {
+                throw new Exception("Bundle Load Exception :"+bundleName+" exception:"+req.error);
             }
 
             if (downloadState != null)
