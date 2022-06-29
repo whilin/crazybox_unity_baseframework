@@ -44,7 +44,7 @@ public class cxNetDriver {
     private bool verbose = false;
 
     public cxNetDriver (String apiEndPoint, bool _verbose = false) {
-        ApiEndPoint = apiEndPoint;
+        ApiEndPoint =apiEndPoint.EndsWith("/") ? apiEndPoint.Remove(apiEndPoint.Length -1) : apiEndPoint;
         verbose = _verbose;
     }
 
@@ -53,7 +53,7 @@ public class cxNetDriver {
     }
 
     protected String GetURL (String apiName) {
-        return ApiEndPoint + "/" + apiName;
+        return ApiEndPoint + ( apiName.StartsWith("/") ? apiName : "/"+apiName);
     }
 
     public async void Request<ResT> (String apiName, object reqPacket, Action<NetRequestState, ResT> callback) where ResT : cxNetPacket {
@@ -71,10 +71,12 @@ public class cxNetDriver {
     public async Task<ResT> RequestAsync<ResT> (HTTP_METHOD method, String apiName, object reqPacket) where ResT : cxNetPacket {
         String json = Newtonsoft.Json.JsonConvert.SerializeObject (reqPacket);
 
-        String url = ApiEndPoint + "/" + apiName;
+        String url = GetURL(apiName);
 
         UnityWebRequest request = new UnityWebRequest (url, method.ToString ());
-        // request.SetRequestHeader("Authorization", "Bearer "+jwt);
+
+        if (!string.IsNullOrEmpty (jwt))
+            request.SetRequestHeader ("Authorization", "Bearer " + jwt);
 
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes (json);
         request.uploadHandler = (UploadHandler) new UploadHandlerRaw (bodyRaw);
@@ -136,9 +138,11 @@ public class cxNetDriver {
     protected async Task<Texture2D> _SendDownloadRequest (HTTP_METHOD method, String apiName, object reqPacket) {
         String json = Newtonsoft.Json.JsonConvert.SerializeObject (reqPacket);
 
-        String url = ApiEndPoint + "/" + apiName;
+        String url =  GetURL(apiName);
 
         UnityWebRequest request = new UnityWebRequest (url, method.ToString ());
+        if (!string.IsNullOrEmpty (jwt))
+            request.SetRequestHeader ("Authorization", "Bearer " + jwt);
 
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes (json);
         request.uploadHandler = (UploadHandler) new UploadHandlerRaw (bodyRaw);
@@ -168,9 +172,11 @@ public class cxNetDriver {
     }
 
     public async Task<String> RequestGet (String fileaname) {
-        String url = ApiEndPoint + "/" + fileaname;
+        String url =  GetURL(fileaname);
 
         UnityWebRequest request = new UnityWebRequest (url, HTTP_METHOD.GET.ToString ());
+        if (!string.IsNullOrEmpty (jwt))
+            request.SetRequestHeader ("Authorization", "Bearer " + jwt);
 
         //byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
         //request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
@@ -203,7 +209,7 @@ public class cxNetDriver {
     }
 
     public async Task<ResT> PostMultipartNot<ResT> (string apiName, cxNetFormFields parameters) where ResT : cxNetPacket {
-        String url = ApiEndPoint + "/" + apiName;
+        String url = GetURL(apiName);
 
         if (verbose)
             Debug.Log ("RequestGet Call:" + url);
@@ -276,16 +282,16 @@ public class cxNetDriver {
     }
 
     public async Task<ResT> PostMultipart<ResT> (string apiName, cxNetFormFields parameters) {
-        String url = ApiEndPoint + "/" + apiName;
+        String url = GetURL(apiName);
 
         List<IMultipartFormSection> requestData = new List<IMultipartFormSection> ();
         foreach (KeyValuePair<string, object> pair in parameters.fields) {
             IMultipartFormSection part = null;
             if (pair.Value is cxNetFormFile) {
-                
+
                 var file = (cxNetFormFile) pair.Value;
 
-                MemoryStream byteStream = new MemoryStream();
+                MemoryStream byteStream = new MemoryStream ();
 
                 byte[] buffer = new byte[32768];
                 int bytesRead;
@@ -302,8 +308,8 @@ public class cxNetDriver {
                         byteStream.Write (buffer, 0, bytesRead);
                 }
 
-                byte [] bytes =  byteStream.ToArray();
-                byteStream.Close();
+                byte[] bytes = byteStream.ToArray ();
+                byteStream.Close ();
 
                 part = new MultipartFormFileSection (
                     pair.Key,
@@ -322,6 +328,9 @@ public class cxNetDriver {
             Debug.Log ("PostMultipart Call:" + apiName);
 
         UnityWebRequest request = UnityWebRequest.Post (url, requestData);
+        if (!string.IsNullOrEmpty (jwt))
+            request.SetRequestHeader ("Authorization", "Bearer " + jwt);
+
         await request.SendWebRequest ();
 
         if (request.result == UnityWebRequest.Result.ConnectionError) {
