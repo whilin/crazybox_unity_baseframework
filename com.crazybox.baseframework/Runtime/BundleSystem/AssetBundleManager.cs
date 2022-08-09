@@ -37,13 +37,10 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
         // #endif
     }
 
-    public void StartWithOption (LoadOption _loadOption) {
+    public void StartWithOption (LoadOption _loadOption, string bundleDownloadURL=null) {
 
         loadOption = _loadOption;
-
-        // #if !UNITY_EDITOR
-        //         loadOption = LoadOption.FromRemoteBundles;
-        // #endif
+        bundleBaseURL = bundleDownloadURL ?? bundleBaseURL;
 
 #if UNITY_ANDROID
         platformName = "Android";
@@ -124,7 +121,7 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
             }
         }
 
-         downloadState (1);
+        downloadState (1);
     }
 
     public async Task LoadSceneBundle (string sceneName, Action<float> downloadState = null) {
@@ -178,8 +175,8 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
             UnityWebRequest req = UnityWebRequest.Get (url);
             await req.SendWebRequest ();
 
-            if( req.result != UnityWebRequest.Result.Success){
-                throw new Exception("Load Bundle Table failed");
+            if (req.result != UnityWebRequest.Result.Success) {
+                throw new Exception ("Load Bundle Table failed");
             }
 
             var json = req.downloadHandler.text;
@@ -212,8 +209,8 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
                 await new WaitForEndOfFrame ();
             }
 
-            if(req.result != UnityWebRequest.Result.Success) {
-                throw new Exception("Bundle Load Exception :"+bundleName+" exception:"+req.error);
+            if (req.result != UnityWebRequest.Result.Success) {
+                throw new Exception ("Bundle Load Exception :" + bundleName + " exception:" + req.error);
             }
 
             if (downloadState != null)
