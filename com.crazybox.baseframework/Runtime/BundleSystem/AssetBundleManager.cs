@@ -124,6 +124,36 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
         downloadState (1);
     }
 
+
+    public async Task LoadBundle (string bundleName, Action<float> downloadState = null) {
+        if (loadOption == LoadOption.FromBuildSetting) {
+            if (downloadState != null) downloadState (0);
+            if (downloadState != null) downloadState (1);
+            return;
+        }
+
+        var bundleDesc = bundleTable.Find(q => q.bundle == bundleName);
+        if (bundleDesc != null) {
+
+            var find = bundles.Find (q => q.name == bundleDesc.bundle);
+
+            if (find == null) {
+                if (loadOption == LoadOption.FromLocalBundles)
+                    find = await LoadBundleInEditor (bundleDesc.bundle, bundleDesc.hash, downloadState);
+                else
+                    find = await LoadBundle (bundleDesc.bundle, bundleDesc.hash, downloadState);
+
+                if (find != null)
+                    bundles.Add (find);
+            }
+
+            if (find == null)
+                throw new Exception ($"{bundleDesc.bundle} load failed");
+        } else {
+            throw new Exception($"{bundleName} bundle desc not found");
+        }
+    }
+
     public async Task LoadSceneBundle (string sceneName, Action<float> downloadState = null) {
         if (loadOption == LoadOption.FromBuildSetting) {
             if (downloadState != null) downloadState (0);
@@ -150,6 +180,8 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
                 throw new Exception ($"{bundleDesc.bundle} load failed");
 
             string[] scenePaths = find.GetAllScenePaths ();
+        }else {
+            throw new Exception($"scene({sceneName}) bundle desc not found");
         }
     }
 
