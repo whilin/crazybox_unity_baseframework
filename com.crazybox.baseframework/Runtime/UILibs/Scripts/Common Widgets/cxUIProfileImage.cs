@@ -62,7 +62,8 @@ public class cxUIProfileImage : MonoBehaviour {
     }
 
     void SaveCache(string url, Texture myTexture){
-         Caching.Add (url, myTexture);
+        if(!Caching.ContainsKey(url))
+            Caching.Add (url, myTexture);
     }
 
     void SetEmpty () {
