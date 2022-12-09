@@ -6,6 +6,12 @@
       "source": "local",
       "dependencies": {}
     },
+    "com.crazybox.basesystem": {
+      "version": "file:../com.crazybox.basesystem",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.collab-proxy": {
       "version": "1.11.2",
       "depth": 0,
