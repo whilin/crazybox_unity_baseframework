@@ -12,5 +12,8 @@
     "name": "Jongok",
     "email": "e.jongok@gmail.com",
     "url": ""
+  },
+  "dependencies": {
+    "com.crazybox.basesystem" : "https://github.com/whilin/crazybox_unity_baseframework.git?path=/com.crazybox.basesystem#vv_main"
   }
 }

@@ -1,0 +1,13 @@
+{
+  "name": "com.crazybox.basesystem",
+  "version": "1.0.1",
+  "displayName": "Crazybox BaseSystem",
+  "description": "Crazybox BaseSystem",
+  "keywords": [
+  ],
+  "author": {
+    "name": "",
+    "email": "",
+    "url": ""
+  }
+}
