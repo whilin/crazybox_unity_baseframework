@@ -23,7 +23,9 @@
         "MongoDB.Driver.dll",
         "MongoDB.Bson.dll",
         "MongoDB.Driver.Core.dll",
-        "MongoDB.Driver.GridFS.dll"
+        "MongoDB.Driver.GridFS.dll",
+        "AsyncAwaitUtil.dll",
+        "UniRx.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

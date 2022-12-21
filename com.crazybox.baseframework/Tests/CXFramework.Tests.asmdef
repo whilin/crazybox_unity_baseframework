@@ -17,7 +17,9 @@
         "MongoDB.Bson.dll",
         "MongoDB.Driver.dll",
         "nunit.framework.dll",
-        "Newtonsoft.Json.dll"
+        "Newtonsoft.Json.dll",
+        "AsyncAwaitUtil.dll",
+        "UniRx.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
