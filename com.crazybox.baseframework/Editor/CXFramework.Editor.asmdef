@@ -13,7 +13,8 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "ExcelDataReader.DataSet.dll",
-        "ExcelDataReader.dll"
+        "ExcelDataReader.dll",
+        "Newtonsoft.Json.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

@@ -11,6 +11,7 @@ public enum NetResult
     AuthFailed = -11,
 }
 
+
 public class cxBlocException : Exception
 {
     int m_code;

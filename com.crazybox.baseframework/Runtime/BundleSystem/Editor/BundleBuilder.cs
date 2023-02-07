@@ -60,16 +60,21 @@ public class BundleBuiler : MonoBehaviour {
 
                 var bundleNames = manifest.GetAllAssetBundles ();
                 foreach (var bundleName in bundleNames) {
+                        var bundlefilePath = Path.Combine (Application.dataPath, "..", $"{AssetBundleSystem.BaseBundlePath}/{platformName}", bundleName);
+
                         var hash = manifest.GetAssetBundleHash (bundleName);
-                        var find = AssetBundle.LoadFromFile (Path.Combine (Application.dataPath, "..", $"{AssetBundleSystem.BaseBundlePath}/{platformName}", bundleName));
+                        var find = AssetBundle.LoadFromFile (bundlefilePath);
                         var assetList = find.GetAllAssetNames ();
                         var sceneList = find.GetAllScenePaths ();
+
+                        var filesize = new FileInfo(bundlefilePath).Length;
 
                         AssetBundleDesc desc = new AssetBundleDesc () {
                                 bundle = bundleName,
                                 hash = hash.ToString (),
                                 scenes = new List<string> (sceneList),
-                                assets = new List<string> (assetList)
+                                assets = new List<string> (assetList),
+                                size = filesize
                         };
 
                         bundles.Add (desc);

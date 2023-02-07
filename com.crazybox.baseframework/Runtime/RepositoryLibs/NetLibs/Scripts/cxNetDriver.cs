@@ -84,7 +84,7 @@ public class cxNetDriver {
         request.uploadHandler.contentType = "application/json";
 
         if (verbose)
-            Debug.Log ("SendNetRequest Call:" + apiName + "body:" + json);
+            Debug.Log ("SendNetRequest Call:" + apiName + ", body:" + json);
 
         await request.SendWebRequest ();
 
@@ -92,7 +92,7 @@ public class cxNetDriver {
             throw new Exception ("ConnectionError");
         } else if (request.result == UnityWebRequest.Result.ProtocolError) {
             string msg = request.downloadHandler.text ?? string.Empty;
-            Debug.Log ($"RequestAsync Error:{request.error} msg:{msg}");
+            Debug.Log ($"RequestAsync Error:{request.error}, msg:{msg}");
             throw new Exception (request.error + ":" + msg);
         } else {
             if (verbose)

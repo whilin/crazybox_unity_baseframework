@@ -7,6 +7,7 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using System.Threading;
 
 public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
 
@@ -74,6 +75,10 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
         return desc;
     }
 
+    public AssetBundleDesc FindBundleDesc(string bundleName) {
+        return bundleTable.Find(q => q.bundle == bundleName);
+    }
+    
     public bool CheckNeedDownload (string sceneName) {
         if (loadOption == LoadOption.FromBuildSetting)
             return false;
@@ -228,17 +233,44 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
         return bundle;
     }
 
-    async Task<AssetBundle> LoadBundle (string bundleName, string hash, Action<float> downloadState = null) {
+    public bool HasCachedVersion(string bundleName){
+        
+        var bundleDesc = bundleTable.Find( q => q.bundle == bundleName);
+        if(bundleDesc == null) {
+            return false;
+        }
+
+        var hash128 = Hash128.Parse(bundleDesc.hash);
+
+        List<Hash128> cachedVersions = new List<Hash128>();
+        Caching.GetCachedVersions(bundleName, cachedVersions);
+        var cacheVersion = cachedVersions.Find(q => q.Equals(hash128));
+
+        return cacheVersion.isValid;
+    }
+
+
+    async Task<AssetBundle> LoadBundle (string bundleName, string hash, Action<float> downloadState = null, CancellationToken? cancellationToken = null) {
         string uri = $"{bundleBaseURL}/{platformName}/{bundleName}";
 
         try {
+           
             var req = UnityWebRequestAssetBundle.GetAssetBundle (uri, Hash128.Parse (hash));
             var asyncOp = req.SendWebRequest ();
 
             while (!asyncOp.isDone && req.result == UnityWebRequest.Result.InProgress) {
                 if (downloadState != null)
                     downloadState (req.downloadProgress);
+                
                 await new WaitForEndOfFrame ();
+
+                if(cancellationToken.HasValue){
+                    if(cancellationToken.Value.IsCancellationRequested) {
+                       // cancellationToken.Value.ThrowIfCancellationRequested();
+                       req.Abort();
+                       throw new Exception($"{bundleName} download aborted by user");
+                    }
+                }
             }
 
             if (req.result != UnityWebRequest.Result.Success) {

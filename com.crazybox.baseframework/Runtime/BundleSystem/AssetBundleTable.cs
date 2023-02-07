@@ -11,6 +11,7 @@ public abstract class AssetBundleSystem {
 public class AssetBundleDesc {
     public string bundle;
     public string hash;
+    public long size;
     public List<string> scenes;
     public List<string> assets;
 }

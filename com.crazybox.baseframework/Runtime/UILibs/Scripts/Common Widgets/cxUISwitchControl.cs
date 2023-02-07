@@ -45,7 +45,7 @@ public class cxUISwitchControl : MonoBehaviour
             SwitchTo(!isOn);
         });
 
-        SwitchTo(isOn);
+        Set(isOn);
     }
 
     public void Set(bool on)
