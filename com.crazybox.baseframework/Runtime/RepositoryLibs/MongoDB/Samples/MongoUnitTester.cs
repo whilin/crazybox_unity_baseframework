@@ -1,26 +1,26 @@
 ﻿#if UNITY_EDITOR
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using System;
-using MongoDB.Bson;
 using MongoDB;
+using MongoDB.Bson;
+using UnityEngine;
 //using m9Mongo;
 
-public class PlayerInfo : cxMongoDocument
-{
-	public int level;
-	public string name;
-	public int scores;
-	public object email;
-	public DateTime fix_date;
-	public DateTime current_date;
-
-	public DateTime date_utcNow;
-
-}
 public class MongoUnitTester : MonoBehaviour {
+
+	public class PlayerInfo : cxMongoDocument {
+		public int level;
+		public string name;
+		public int scores;
+		public object email;
+		public DateTime fix_date;
+		public DateTime current_date;
+
+		public DateTime date_utcNow;
+
+	}
 
 	public cxMongoDatabase testDB;
 
@@ -28,15 +28,14 @@ public class MongoUnitTester : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
+
 		//testDB.TryConnect();
 		//playerCollection=testDB.GetCollection<PlayerInfo>("players");
 
 	}
 
-	[ContextMenu("TestQuery")]
-	void TestQuery()
-	{
+	[ContextMenu ("TestQuery")]
+	void TestQuery () {
 		//playerCollection.FindAllAsync(
 		//		delegate(List<PlayerInfo> result)
 		//		{
@@ -52,11 +51,10 @@ public class MongoUnitTester : MonoBehaviour {
 		//			Debug.Log("FindAllAsync  Failed");
 		//		});
 	}
-	
+
 	// Update is called once per frame
-	void Update () 
-	{
-		
+	void Update () {
+
 	}
 }
 

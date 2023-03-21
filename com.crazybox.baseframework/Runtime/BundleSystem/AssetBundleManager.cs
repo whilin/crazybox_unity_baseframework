@@ -130,11 +130,11 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
     }
 
 
-    public async Task LoadBundle (string bundleName, Action<float> downloadState = null) {
+    public async Task<AssetBundle> LoadBundle (string bundleName, Action<float> downloadState = null) {
         if (loadOption == LoadOption.FromBuildSetting) {
             if (downloadState != null) downloadState (0);
             if (downloadState != null) downloadState (1);
-            return;
+            return null;
         }
 
         var bundleDesc = bundleTable.Find(q => q.bundle == bundleName);
@@ -154,6 +154,8 @@ public class AssetBundleManager : MonoSingleton<AssetBundleManager> {
 
             if (find == null)
                 throw new Exception ($"{bundleDesc.bundle} load failed");
+            
+            return find;
         } else {
             throw new Exception($"{bundleName} bundle desc not found");
         }

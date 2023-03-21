@@ -71,9 +71,9 @@ public class cxUINavigator : MonoSingleton<cxUINavigator> {
         var frame = frames.Find (q => q.GetType () == typeof (T));
 
         if (frame == null)
-            throw new Exception ("PushFrame FrameType not found type:" + typeof (T));
+            throw new Exception ("ShowDialog FrameType not found type:" + typeof (T));
         if (!frame.IsDialog)
-            throw new Exception ("PushFrame FrameType is Not Dialog type:" + typeof (T));
+            throw new Exception ("ShowDialog FrameType is Not Dialog type:" + typeof (T));
 
         cxUIContext context = new cxUIContext (showParam);
         frame.PushPopup (context, showParam);
