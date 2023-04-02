@@ -1,0 +1,23 @@
+{
+    "name": "com.crazybox.framework.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:2af7c8fc8141b4ee49e25e861b6c1db4",
+        "GUID:f06555f75b070af458a003d92f9efb00"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "ExcelDataReader.DataSet.dll",
+        "ExcelDataReader.dll",
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

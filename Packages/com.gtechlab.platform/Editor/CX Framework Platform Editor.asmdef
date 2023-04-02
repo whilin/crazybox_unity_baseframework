@@ -1,0 +1,18 @@
+{
+    "name": "cxPlatformEditor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d1830aefea20c4fc5a093c3e1adad3f2",
+        "GUID:2af7c8fc8141b4ee49e25e861b6c1db4",
+        "GUID:899f81f73b6f94643b431f53af4e5f77"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

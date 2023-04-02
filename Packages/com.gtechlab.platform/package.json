@@ -1,0 +1,16 @@
+{
+  "name": "com.gtechlab.platform",
+  "version": "1.0.1",
+  "displayName": "0. G-Tech Lab Platform Package",
+  "description": "G-TechLab Platform package",
+  "keywords": [
+    "keyword1",
+    "keyword2",
+    "keyword3"
+  ],
+  "author": {
+    "name": "Grayson.Lee",
+    "email": "e.jongok@gmail.com",
+    "url": ""
+  }
+}
