@@ -6,15 +6,16 @@ using UnityEditor;
 #endif
 
 public enum cxStartUpEnvId {
-    Undef,
+    Editor,
     DEV,
     BETA,
-    RELEASE,
+    RELEASE  
 }
 
 
 [CreateAssetMenu (fileName = "StartupEnvTable", menuName = "G-Tech Lab/Create Startup env table", order = 0)]
 public class cxStartupEnvTable : ScriptableObject {
+    [Header("This file must located at Resources/AppEnvironment/StartupEnvTable")]
     public cxStartUpEnvId startUpEnv;
 
     private cxStartupEnvSetting GetActiveSetting () {
@@ -32,7 +33,7 @@ public class cxStartupEnvTable : ScriptableObject {
         var table = Resources.Load<cxStartupEnvTable> ("AppEnvironment/StartupEnvTable");
 
           if(!table )
-            throw new Exception("mcApplicationSetupTable not found");
+            throw new Exception("cxStartupEnvTable not found at Resources/AppEnvironment/");
         
         return table.GetActiveSetting();
     }
@@ -42,7 +43,7 @@ public class cxStartupEnvTable : ScriptableObject {
         var table = Resources.Load<cxStartupEnvTable> ("AppEnvironment/StartupEnvTable");
 
           if(!table )
-            throw new Exception("mcApplicationSetupTable not found");
+            throw new Exception("cxStartupEnvTable not found at Resources/AppEnvironment/");
         
         return table.GetActiveSetting() as T;
     }
@@ -51,6 +52,9 @@ public class cxStartupEnvTable : ScriptableObject {
 #if UNITY_EDITOR
     public static void SetActiveSetting(cxStartUpEnvId settingId){
         var table = Resources.Load<cxStartupEnvTable> ("AppEnvironment/StartupEnvironment");
+
+        if(!table )
+            throw new Exception("cxStartupEnvTable not found at Resources/AppEnvironment/");
         
         var list = Resources.LoadAll<cxStartupEnvSetting> ("StartupEnvTable");
         var list2 = new List<cxStartupEnvSetting> (list);

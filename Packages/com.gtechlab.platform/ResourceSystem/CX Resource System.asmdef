@@ -1,11 +1,11 @@
 {
-    "name": "G-TechLabPlatformRuntime",
+    "name": "CXResourceSystem",
     "rootNamespace": "",
     "references": [
         "GUID:2af7c8fc8141b4ee49e25e861b6c1db4",
         "GUID:560b04d1a97f54a4e82edc0cbbb69285",
         "GUID:07fb4c5fa774f4449a412c415f5d8101",
-        "GUID:56dedc10546c84972811b3a17239e269"
+        "GUID:8c1b5e158961445498f8a66188fbb2e3"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

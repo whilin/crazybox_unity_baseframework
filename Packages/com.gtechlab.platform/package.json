@@ -2,7 +2,7 @@
   "name": "com.gtechlab.platform",
   "version": "1.0.1",
   "displayName": "0. G-Tech Lab Platform Package",
-  "description": "G-TechLab Platform package",
+  "description": "G-Tech Lab Platform package",
   "keywords": [
     "keyword1",
     "keyword2",
@@ -14,6 +14,6 @@
     "url": ""
   },
   "dependencies": {
-    "com.unity.sharp-zip-lib" : "1.3.2-preview"
+    "com.unity.sharp-zip-lib": "1.3.2-preview"
   }
 }
