@@ -4,9 +4,12 @@
     "references": [
         "GUID:d1830aefea20c4fc5a093c3e1adad3f2",
         "GUID:2af7c8fc8141b4ee49e25e861b6c1db4",
-        "GUID:899f81f73b6f94643b431f53af4e5f77"
+        "GUID:899f81f73b6f94643b431f53af4e5f77",
+        "GUID:8c1b5e158961445498f8a66188fbb2e3"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

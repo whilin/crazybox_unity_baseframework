@@ -5,7 +5,7 @@ using System.Collections;
 	using UnityEditor;
 #endif
 
-public class ScriptUtil : MonoBehaviour 
+public static class ScriptUtil  
 {
     public static GameObject FindChildrenWithTag(string tagname, GameObject obj)
     {
@@ -29,7 +29,7 @@ public class ScriptUtil : MonoBehaviour
 	        Object obj = Resources.Load(prefabpath);
 			if (obj == null) return null;
 			
-	        GameObject prefab = (GameObject)Instantiate(obj);
+	        GameObject prefab = (GameObject) GameObject.Instantiate(obj);
 			if (prefab == null) return null;
 			
 	        prefab.name = obj.name;
@@ -50,7 +50,7 @@ public class ScriptUtil : MonoBehaviour
 	        Object obj = Resources.Load(prefabpath);
 			if (obj == null) return null;
 			
-	        GameObject prefab = (GameObject)Instantiate(obj);
+	        GameObject prefab = (GameObject)GameObject.Instantiate(obj);
 			if (prefab == null) return null;
 			
 	        prefab.name = obj.name;
@@ -78,7 +78,7 @@ public class ScriptUtil : MonoBehaviour
 	        Object obj = Resources.Load(prefabpath);
 			if (obj == null) return null;
 			
-	        GameObject prefab = (GameObject)Instantiate(obj);
+	        GameObject prefab = (GameObject)GameObject.Instantiate(obj);
 			if (prefab == null) return null;
 			
 	        prefab.name = obj.name;
@@ -106,7 +106,7 @@ public class ScriptUtil : MonoBehaviour
 	        Object obj = Resources.Load(prefabpath);
 			if (obj == null) return null;
 			
-	        GameObject prefab = (GameObject)Instantiate(obj);
+	        GameObject prefab = (GameObject)GameObject.Instantiate(obj);
 			if (prefab == null) return null;
 			
 	        prefab.name = obj.name;
@@ -135,7 +135,7 @@ public class ScriptUtil : MonoBehaviour
     {
 		try
 	    {
-	        GameObject prefab = (GameObject)Instantiate(prefabobj);
+	        GameObject prefab = (GameObject)GameObject.Instantiate(prefabobj);
 			if (prefab == null) return null;
 			
 	        prefab.name = prefabobj.name;
@@ -160,7 +160,7 @@ public class ScriptUtil : MonoBehaviour
 	{
 		try
 		{
-			GameObject prefab = (GameObject)Instantiate(prefabobj);
+			GameObject prefab = (GameObject)GameObject.Instantiate(prefabobj);
 			if (prefab == null) return null;
 			
 			prefab.name = prefabobj.name;
@@ -229,7 +229,7 @@ public class ScriptUtil : MonoBehaviour
     {
         try
         {
-            T prefab = (T)Instantiate(prefabobj);
+            T prefab = (T)GameObject.Instantiate(prefabobj);
             if (prefab == null) return null;
 
             prefab.name = prefabobj.name;
@@ -254,12 +254,12 @@ public class ScriptUtil : MonoBehaviour
         return null;
     }
 
-
+/*
     public static T PrefabCreateUGUI<T>(T prefabobj, GameObject prefabparentobj) where T : MonoBehaviour
     {
         try
         {
-            T prefab = (T)Instantiate(prefabobj);
+            T prefab = (T)GameObject.Instantiate(prefabobj);
             if (prefab == null) return null;
 
             prefab.name = prefabobj.name;
@@ -289,12 +289,12 @@ public class ScriptUtil : MonoBehaviour
         }
         return null;
     }
-
+*/
     public static GameObject PrefabCreate(GameObject prefabobj, string prefabparentpath, string createname)
     {
 		try
 	    {
-	        GameObject prefab = (GameObject)Instantiate(prefabobj);
+	        GameObject prefab = (GameObject)GameObject.Instantiate(prefabobj);
 			if (prefab == null) return null;
 			
 	        prefab.name = createname;
@@ -322,7 +322,7 @@ public class ScriptUtil : MonoBehaviour
 	        Object obj = Resources.Load(prefabpath);
 			if (obj == null) return null;
 			
-	        GameObject prefab = (GameObject)Instantiate(obj);
+	        GameObject prefab = (GameObject)GameObject.Instantiate(obj);
 			if (prefab == null) return null;
 			
 	        prefab.name = obj.name;
@@ -481,7 +481,7 @@ public class ScriptUtil : MonoBehaviour
 		return texture;
 		*/
 	}
-	
+	/*
 	public void LoadPoto(string url, System.Action<Texture2D> result)
 	{
 		StartCoroutine(_LoadPhoto(url, result));
@@ -508,4 +508,5 @@ public class ScriptUtil : MonoBehaviour
 		
 		result(www.texture);
 	}
+	*/
 }

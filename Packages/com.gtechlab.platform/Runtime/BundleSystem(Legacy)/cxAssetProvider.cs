@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 //using VoxelBusters.NativePlugins;
 
+[Obsolete]
 public class cxAssetProvider : cxSingleton<cxAssetProvider> {
     
     public async Task<string> LoadJson(string path) {

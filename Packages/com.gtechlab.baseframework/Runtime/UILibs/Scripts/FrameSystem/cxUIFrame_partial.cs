@@ -155,7 +155,7 @@ public abstract partial class cxUIFrame : MonoBehaviour {
     }
 
     public static void HandleGameStateMessage (int msg, object msgParam) {
-        if (msg == ReservedGameMsg.OnBack) {
+        if (msg == cxReservedGameMsg.OnBack) {
             if (ActiveFrame != null) {
                 if (ActiveFrame.ActivePopup)
                     ActiveFrame.ActivePopup.OnGameStateMessage (msg, msgParam);

@@ -6,7 +6,7 @@ using UnityEngine;
 public class cxStartupBasicEnvSetting : cxStartupEnvSetting {
     
     public string backendServerURL;
-    public AssetBundleManager.LoadOption bundleLoadOption;
+    public cxAssetBundleManager.LoadOption bundleLoadOption;
     public string bundleLoadURL;
     public bool verboseLog;
 }

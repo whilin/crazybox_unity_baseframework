@@ -18,7 +18,7 @@ public class cxUINavigator : MonoSingleton<cxUINavigator> {
 
         frames = new List<cxUIFrame> ();
         foreach (var p in prefabs) {
-            var frame = ScriptUtil.PrefabCreateUGUI<cxUIFrame> (p, rootCanvas.gameObject);
+            var frame = PrefabCreateUGUI<cxUIFrame> (p, rootCanvas.gameObject);
             frames.Add (frame);
         }
     }
@@ -85,4 +85,41 @@ public class cxUINavigator : MonoSingleton<cxUINavigator> {
         if (cxUIFrame.ActiveFrame?.ActivePopup)
             cxUIFrame.ActiveFrame?.ActivePopup.Pop ();
     }
+
+    
+    private static T PrefabCreateUGUI<T>(T prefabobj, GameObject prefabparentobj) where T : MonoBehaviour
+    {
+        try
+        {
+            T prefab = (T)GameObject.Instantiate(prefabobj);
+            if (prefab == null) return null;
+
+            prefab.name = prefabobj.name;
+
+            GameObject parent = prefabparentobj;
+            if (parent != null)
+            {
+                prefab.transform.SetParent(parent.transform);
+                //prefab.transform.Translate(parent.transform.position);
+            }
+
+            var rectT = prefab.GetComponent<RectTransform>();
+            //Ah-hoc, Jongok
+            rectT.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+            rectT.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+
+			rectT.anchorMin = new Vector2(0,0);
+			rectT.anchorMax = new Vector2(1,1);
+			rectT.offsetMin = new Vector2(0,0);
+			rectT.offsetMax = new Vector2(0,0);
+
+            return prefab;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.Log("PrefabCreate except : " + ex.Message);
+        }
+        return null;
+    }
+
 }

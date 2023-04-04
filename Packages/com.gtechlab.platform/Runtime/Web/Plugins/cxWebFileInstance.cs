@@ -6,8 +6,8 @@ using UnityEngine;
 public class cxWebFileInstance : MonoBehaviour {
 
 #if UNITY_WEBGL && !UNITY_EDITOR
+    [DllImport ("__Internal")]
     private static extern void downloadFile (byte[] array, int size, string fileNamePtr);
-
 #endif
 
     private void Awake () {

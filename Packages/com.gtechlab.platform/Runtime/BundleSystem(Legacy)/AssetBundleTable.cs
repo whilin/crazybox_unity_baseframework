@@ -16,13 +16,15 @@ public class AssetBundleDesc {
     public List<string> assets;
 }
 
+[Obsolete]
 [Serializable]
 public class AssetDesc {
     public string name;
     public string bundle;
 }
 
-[CreateAssetMenu (fileName = "AssetBundle Table", menuName = "ModooBike/Create AssetBundle Table", order = 1)]
+[Obsolete]
+[CreateAssetMenu (fileName = "AssetBundle Table", menuName = "G-Tech Lab/Create AssetBundle Table", order = 1)]
 public class AssetBundleTable : ScriptableObject {
     public List<AssetDesc> list;
 
