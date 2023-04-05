@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e479b2f0cf97046819cb88518556aa79, type: 3}
   m_Name: CreatorEnvironment
   m_EditorClassIdentifier: 
+  CreatorId: Grayson.Lee
+  CreatorDomain: com.gtechlab
+  sceneTemplate: {fileID: 11400000, guid: e5aa9a01dc2e3401ca51983229e20720, type: 2}
   BuildOutputPath: ./BundleBuild/
   ResourceInfoServerUrl: http://127.0.0.1:5001
   ResourceUploadServerUrl: http://127.0.0.1:5001

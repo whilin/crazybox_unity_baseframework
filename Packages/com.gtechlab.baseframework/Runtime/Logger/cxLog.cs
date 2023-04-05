@@ -22,14 +22,14 @@ public static class cxLog {
     }
 
     public static void Warning (string format, params object[] args) {
-        Debug.LogFormat (LogType.Warning, LogOption.None, null, format, args);
+        Debug.LogFormat (LogType.Warning, LogOption.NoStacktrace, null, format, args);
     }
     
     public static void Error (string format, params object[] args) {
         Debug.LogFormat (LogType.Error, LogOption.None, null, format, args);
     }
 
-    public static void Error (System.Exception ex) { 
+    public static void Exception (System.Exception ex) { 
         Debug.LogError(ex);
     }
 }

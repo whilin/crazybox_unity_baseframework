@@ -9,9 +9,9 @@ public class cxResourceCreateWindow : EditorWindow {
 
     public class ResourceInputModel {
         public string resourceId;
-        public int version;
+        public int version = 1;
         public string creatorId;
-
+        public cxResourceType resourceType;
         public string path;
 
         public bool IsValid () {
@@ -22,7 +22,7 @@ public class cxResourceCreateWindow : EditorWindow {
     }
 
     private bool ok = false;
-    private bool isRoomItem = false;
+    private bool isScene = false;
 
     private UnityEvent<ResourceInputModel> onCloseCallback = new UnityEvent<ResourceInputModel> ();
     private ResourceInputModel resourceInput = new ResourceInputModel ();
@@ -34,17 +34,23 @@ public class cxResourceCreateWindow : EditorWindow {
     //     });
     // }
 
-    public static void Show (bool isRoomItem, Action<ResourceInputModel> callback) {
-        cxResourceCreateWindow window = EditorWindow.CreateInstance<cxResourceCreateWindow> ();
-        window.isRoomItem = isRoomItem;
+    public static void Show ( string path, bool isScene,Action<ResourceInputModel> callback) {
 
-        int width = 800;
-        int height = 500;
+        var env = cxCreatorEnvironment.GetEnvironment();
+
+        cxResourceCreateWindow window = EditorWindow.CreateInstance<cxResourceCreateWindow> ();
+        window.isScene = isScene;
+        window.resourceInput.resourceId = $"{env.CreatorDomain}.<id>";
+        window.resourceInput.creatorId = env.CreatorId;
+        window.resourceInput.resourceType = isScene ? cxResourceType.Scene : cxResourceType.Asset;
+
+        int width = 300;
+        int height = 400;
 
         window.position = new Rect (Screen.width / 2 - width >> 1, Screen.height / 2 - height >> 1, width, height);
         window.ShowUtility ();
-        window.onCloseCallback.AddListener ((resouceId) => {
-            callback (resouceId);
+        window.onCloseCallback.AddListener ((input) => {
+            callback (input);
         });
     }
 
@@ -68,6 +74,7 @@ public class cxResourceCreateWindow : EditorWindow {
         resourceInput.creatorId = EditorGUILayout.TextField (resourceInput.creatorId);
         GUILayout.Space (20);
 
+        /*
         EditorGUILayout.LabelField ("resource create path", style);
         EditorGUILayout.LabelField (GetDisplayPathName (resourceInput.path));
         if (GUILayout.Button ("select path")) {
@@ -78,17 +85,11 @@ public class cxResourceCreateWindow : EditorWindow {
                 resourceInput.path = "Assets/" + path.Substring (Application.dataPath.Length);
             }
         }
+*/
 
         GUILayout.Space (40);
 
-        string label = string.Empty;
-
-        if (isRoomItem) {
-            label = "Create Room Item";
-        } else {
-            label = "Create Room Template";
-        }
-
+        string label = "Create Resource Template";
         if (GUILayout.Button (label)) {
             ok = true;
             this.Close ();

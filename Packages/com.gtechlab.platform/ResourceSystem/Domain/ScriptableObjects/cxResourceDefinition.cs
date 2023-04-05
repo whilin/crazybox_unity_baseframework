@@ -9,6 +9,7 @@ using UnityEngine;
 public class cxResourceDefinition : ScriptableObject {
     public string resourceId;
     public cxResourceType resourceType;
+    public int version = 1;
 
     public cxResourceDescModel ToModel(){
         return new cxResourceDescModel(){

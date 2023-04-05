@@ -9,7 +9,7 @@ using UnityEngine;
 
 public abstract class cxResourceBuilder {
 
-    [MenuItem ("Assets/G-Tech Lab/Build ResourceBundle(+Upload)", true, 0)]
+    [MenuItem ("Assets/G-Tech Lab/Build Resource Bundle(+Upload)", true, 0)]
     public static bool BuildSelectedObjectValid () {
         if (Selection.activeObject is cxResourceDefinition) {
             return true;
@@ -23,60 +23,61 @@ public abstract class cxResourceBuilder {
         try {
             var prefab = Selection.activeObject as cxResourceDefinition;
             var desc = BuildResource (prefab);
-            BuildPackage(desc);
+            BuildPackage (desc);
         } catch (Exception ex) {
-            Debug.LogException(ex);
+            Debug.LogException (ex);
             cxEditorWindowUtils.ShowErrorMessage ("Build Resource Bundle", ex.Message);
         }
     }
-  
 
     [MenuItem ("Tools/G-Tech Lab/Build All Resource Bundle(+Upload)")]
     public static void BuildAllResource () {
         try {
             var defs = AssetDatabase.FindAssets ("t:cxResourceDefinition");
 
-            List<cxResourceDescModel> list = new List<cxResourceDescModel>();
+            List<cxResourceDescModel> list = new List<cxResourceDescModel> ();
 
             foreach (var guid in defs) {
                 var path = AssetDatabase.GUIDToAssetPath (guid);
                 var def = AssetDatabase.LoadAssetAtPath<cxResourceDefinition> (path);
                 var desc = BuildResource (def);
-                list.Add(desc);
+                list.Add (desc);
             }
 
-            foreach(var desc in list){
-                BuildPackage(desc);
+            foreach (var desc in list) {
+                BuildPackage (desc);
             }
 
-        } catch (Exception ex) {
-            Debug.LogError(ex);
-            cxEditorWindowUtils.ShowErrorMessage ("Build All Resource Bundle", ex.Message);
-        }
-    }
- [MenuItem ("Tools/G-Tech Lab/Clear Bundle Caching")]
-    public static void ClearBundleCache () {
-        Caching.ClearCache();
-    }
-/*
-    [MenuItem ("Tools/G-Tech Lab/Build All Asset Bundles(By Bundle name)")]
-    public static void BuildAllAssetBundles () {
-        try {
-            string[] allAssetBundles = AssetDatabase.GetAllAssetBundleNames ();
-
-            List<string> allAssetsInAnAssetBundle = new List<string> ();
-            for (int i = 0; i < allAssetBundles.Length; ++i) {
-                var curBundleName = allAssetBundles[i];
-                var assetsInCurBundle = AssetDatabase.GetAssetPathsFromAssetBundle (curBundleName);
-
-                allAssetsInAnAssetBundle.AddRange (assetsInCurBundle);
-            }
         } catch (Exception ex) {
             Debug.LogError (ex);
             cxEditorWindowUtils.ShowErrorMessage ("Build All Resource Bundle", ex.Message);
         }
     }
-*/
+
+    [MenuItem ("Tools/G-Tech Lab/Clear Bundle Caching")]
+    public static void ClearBundleCache () {
+        Caching.ClearCache ();
+    }
+
+    /*
+        [MenuItem ("Tools/G-Tech Lab/Build All Asset Bundles(By Bundle name)")]
+        public static void BuildAllAssetBundles () {
+            try {
+                string[] allAssetBundles = AssetDatabase.GetAllAssetBundleNames ();
+
+                List<string> allAssetsInAnAssetBundle = new List<string> ();
+                for (int i = 0; i < allAssetBundles.Length; ++i) {
+                    var curBundleName = allAssetBundles[i];
+                    var assetsInCurBundle = AssetDatabase.GetAssetPathsFromAssetBundle (curBundleName);
+
+                    allAssetsInAnAssetBundle.AddRange (assetsInCurBundle);
+                }
+            } catch (Exception ex) {
+                Debug.LogError (ex);
+                cxEditorWindowUtils.ShowErrorMessage ("Build All Resource Bundle", ex.Message);
+            }
+        }
+    */
 
     static void CheckValidResourceDef (cxResourceDefinition def) {
 
@@ -90,7 +91,7 @@ public abstract class cxResourceBuilder {
 
         if (!fileName.Equals (def.resourceId)) {
             throw new Exception ($"{path} must have same name with resourceId");
-           // return false;
+            // return false;
         }
 
         var sceneFiles = cxBundleBuilderUtil.QueryFilesInPath (path, true);
@@ -99,36 +100,37 @@ public abstract class cxResourceBuilder {
         if (def.resourceType == cxResourceType.Scene) {
             if (sceneFiles.Count == 0) {
                 throw new Exception ($"{path} must have one more scene");
-              //  return false;
+                //  return false;
             }
         } else {
             if (assetFiles.Count == 0) {
                 throw new Exception ($"{path} must have one more assets");
-               // return false;
+                // return false;
             }
 
             if (sceneFiles.Count > 0) {
                 throw new Exception ($"{path} can't contain scenes");
-               // return false;
+                // return false;
             }
         }
 
-       // return true;
+        // return true;
     }
 
     static cxResourceDescModel BuildResource (cxResourceDefinition def) {
-        //Debug.Log ($"Build Resource {def.resourceId} ({def.resourceType}) Begin:" + prefabPath);
+        var env = cxCreatorEnvironment.GetEnvironment ();
 
-        var prefabPath = AssetDatabase.GetAssetPath (def);
+        var path = AssetDatabase.GetAssetPath (def);
 
         CheckValidResourceDef (def);
 
-        var files = cxBundleBuilderUtil.QueryFilesInPath (prefabPath, def.resourceType == cxResourceType.Scene);
+        var files = cxBundleBuilderUtil.QueryFilesInPath (path, def.resourceType == cxResourceType.Scene);
 
         var resourceModel = def.ToModel ();
         resourceModel.date = DateTime.Now;
-        resourceModel.resourceLocation = string.Empty; // VaivResourceLoaderUtil.CombineURL (CreatorWorksDefine.ResourceBaseLocation, resourceModel.resourceId);
-      
+        resourceModel.creatorId = env.CreatorId;
+        resourceModel.resourceLocation = string.Empty;
+
         BuildBundle (resourceModel, files);
 
         return resourceModel;
@@ -163,8 +165,8 @@ public abstract class cxResourceBuilder {
         List<cxResourceAssetFile> includeFiles = new List<cxResourceAssetFile> ();
 
         foreach (var assetFile in output.includeScenes) {
-                includeFiles.Add (new cxResourceAssetFile () {
-                 fileType = cxResourceAssetFileType.BundleScene,
+            includeFiles.Add (new cxResourceAssetFile () {
+                fileType = cxResourceAssetFileType.BundleScene,
                     filename = assetFile
             });
         }
@@ -175,7 +177,6 @@ public abstract class cxResourceBuilder {
                     filename = assetFile
             });
         }
-        
 
         resourceModel.assetFiles = includeFiles.ToArray ();
         resourceModel.bundleHash = output.resourceHash;
@@ -188,21 +189,18 @@ public abstract class cxResourceBuilder {
             file.Flush ();
         }
 
-         Debug.Log ("Build Bundle Completed:" + resourceModel.resourceId);
+        Debug.Log ("Build Bundle Completed:" + resourceModel.resourceId);
     }
 
-    static void BuildPackage(cxResourceDescModel resourceModel) {
-          var env = cxCreatorEnvironment.GetEnvironment ();
+    static void BuildPackage (cxResourceDescModel resourceModel) {
+        var env = cxCreatorEnvironment.GetEnvironment ();
 
         var pkgFile = cxBundleBuilderUtil.BuildZipPackage (resourceModel.resourceId);
-       
 
-        if(!string.IsNullOrEmpty(env.ResourceUploadServerUrl)){
+        if (!string.IsNullOrEmpty (env.ResourceUploadServerUrl)) {
             UploadPackage (resourceModel.resourceId, pkgFile);
         }
     }
-
-
 
     [MenuItem ("Tools/G-Tech Lab/Debug/Upload Test")]
     static void UploadTest () {
@@ -217,7 +215,7 @@ public abstract class cxResourceBuilder {
         repo.UploadResourcePackage (resourceId, pkgFile,
             (resourceInfo) => {
                 //  cxEditorWindowUtils.ShowMessage("리소스 업로드 완료");
-                Debug.Log("UploadPackage completed: "+resourceId);
+                Debug.Log ("UploadPackage completed: " + resourceId);
             },
             (error) => {
                 Debug.LogError (error);

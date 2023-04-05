@@ -17,9 +17,13 @@ public enum cxStartUpEnvId {
 public class cxStartupEnvTable : ScriptableObject {
     [Header("This file must located at Resources/AppEnvironment/StartupEnvTable")]
     public cxStartUpEnvId startUpEnv;
+    
+    private const string TableName = "AppEnvironment/StartupEnvTable";
+    private const string SettingPath = "AppEnvironment";
+
 
     private cxStartupEnvSetting GetActiveSetting () {
-        var list = Resources.LoadAll<cxStartupEnvSetting> ("AppEnvironment");
+        var list = Resources.LoadAll<cxStartupEnvSetting> (SettingPath);
         var list2 = new List<cxStartupEnvSetting> (list);
 
         var setting = list2.Find (q => q.settingId == startUpEnv);
@@ -30,7 +34,7 @@ public class cxStartupEnvTable : ScriptableObject {
     }
 
     public static cxStartupEnvSetting LoadActiveSetting(){
-        var table = Resources.Load<cxStartupEnvTable> ("AppEnvironment/StartupEnvTable");
+        var table = Resources.Load<cxStartupEnvTable> (TableName);
 
           if(!table )
             throw new Exception("cxStartupEnvTable not found at Resources/AppEnvironment/");
@@ -40,7 +44,7 @@ public class cxStartupEnvTable : ScriptableObject {
 
 
     public static T LoadActiveSetting<T>() where T : cxStartupEnvSetting {
-        var table = Resources.Load<cxStartupEnvTable> ("AppEnvironment/StartupEnvTable");
+        var table = Resources.Load<cxStartupEnvTable> (TableName);
 
           if(!table )
             throw new Exception("cxStartupEnvTable not found at Resources/AppEnvironment/");
@@ -51,12 +55,12 @@ public class cxStartupEnvTable : ScriptableObject {
 
 #if UNITY_EDITOR
     public static void SetActiveSetting(cxStartUpEnvId settingId){
-        var table = Resources.Load<cxStartupEnvTable> ("AppEnvironment/StartupEnvironment");
+        var table = Resources.Load<cxStartupEnvTable> (TableName);
 
         if(!table )
             throw new Exception("cxStartupEnvTable not found at Resources/AppEnvironment/");
         
-        var list = Resources.LoadAll<cxStartupEnvSetting> ("StartupEnvTable");
+        var list = Resources.LoadAll<cxStartupEnvSetting> (SettingPath);
         var list2 = new List<cxStartupEnvSetting> (list);
 
         if(list2.Exists(q => q.settingId == settingId)){
