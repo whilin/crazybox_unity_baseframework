@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 4286026557046654964}
   - component: {fileID: 2759980229159711250}
   - component: {fileID: 4368179331884549829}
+  - component: {fileID: 7998097742935341387}
   m_Layer: 6
   m_Name: DefaultPlayerController_Setup_v1
   m_TagString: Untagged
@@ -321,6 +322,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerCameraTarget: {fileID: 7812759813414607659}
   nameTagAnchor: {fileID: 6889797832549776708}
+--- !u!114 &7998097742935341387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1604357078297424009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f98665dc6d2f4656ae3f27785eeea33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  previewParts:
+  - {fileID: 5363036757122287101, guid: 2f1b7c9e8f9fb47d49cc1017862dce9b, type: 3}
 --- !u!1 &1604357078297424013
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-class TUploadResourcePackageResponse : cxNetPacket {
+class TUploadResourcePackageResponse : cxNetMessage {
     public int resultCode;
     public cxResourceDescModel resourceDesc;
 }

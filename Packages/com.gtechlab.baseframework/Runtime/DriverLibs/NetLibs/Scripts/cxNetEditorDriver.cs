@@ -377,7 +377,7 @@ public class cxNetEditorDriver {
         }
     */
 
-    public async Task<ResT> RequestAsync<ResT> (HTTP_METHOD method, String apiName, object reqPacket) where ResT : cxNetPacket {
+    public async Task<ResT> RequestAsync<ResT> (HTTP_METHOD method, String apiName, object reqPacket) where ResT : cxNetMessage {
         ResT result = null;
         string error = null;
 
@@ -401,7 +401,7 @@ public class cxNetEditorDriver {
         });
     }
 
-    public void RequestCallback<ResT> (HTTP_METHOD method, String apiName, object reqPacket, Action<ResT> onResponse, Action<string> onError) where ResT : cxNetPacket {
+    public void RequestCallback<ResT> (HTTP_METHOD method, String apiName, object reqPacket, Action<ResT> onResponse, Action<string> onError) where ResT : cxNetMessage {
         String json = Newtonsoft.Json.JsonConvert.SerializeObject (reqPacket);
 
         String url = GetURL (apiName);
@@ -426,7 +426,7 @@ public class cxNetEditorDriver {
         }));
     }
 
-    public async Task<ResT> PostMultipartAync<ResT> (string apiName, cxNetFormFields parameters) where ResT : cxNetPacket {
+    public async Task<ResT> PostMultipartAync<ResT> (string apiName, cxNetFormFields parameters) where ResT : cxNetMessage {
         ResT result = null;
         string error = null;
 
@@ -450,7 +450,7 @@ public class cxNetEditorDriver {
         });
     }
 
-    public void PostMultipartCallback<ResT> (string apiName, cxNetFormFields parameters, Action<ResT> onResponse, Action<string> onError) where ResT : cxNetPacket {
+    public void PostMultipartCallback<ResT> (string apiName, cxNetFormFields parameters, Action<ResT> onResponse, Action<string> onError) where ResT : cxNetMessage {
         String url = GetURL (apiName);
 
         List<IMultipartFormSection> requestData = new List<IMultipartFormSection> ();
@@ -507,7 +507,7 @@ public class cxNetEditorDriver {
         }));
     }
 
-    IEnumerator SendRequest<ResT> (UnityWebRequest request, Action<ResT> onResponse, Action<string> onError) where ResT : cxNetPacket {
+    IEnumerator SendRequest<ResT> (UnityWebRequest request, Action<ResT> onResponse, Action<string> onError) where ResT : cxNetMessage {
 
         var asyncOp = request.SendWebRequest ();
         do {

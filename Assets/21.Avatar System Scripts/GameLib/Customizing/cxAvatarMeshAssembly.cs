@@ -1,27 +1,26 @@
 using System.Collections.Generic;
-using UnityEngine;
 using System.Threading.Tasks;
+using UnityEngine;
 
 public static class cxAvatarMeshAssembly {
 
+    static async Task<GameObject> FindAvatarItem (int itemCode, int defaultItemCode) {
 
-    static async Task<GameObject> FindAvatarItem(int itemCode, int defaultItemCode){
-
-        var itemDesc = cxGetIt.Get<cxIGameItemBloc> ().FindAvatarItemDesc (itemCode !=0 ? itemCode : defaultItemCode);
-        if(itemDesc !=null) {
+        var itemDesc = cxGetIt.Get<cxIGameItemBloc> ().FindAvatarItemDesc (itemCode != 0 ? itemCode : defaultItemCode);
+        if (itemDesc != null) {
             var prefabs = await cxGetIt.Get<cxIGameItemBloc> ().LoadAvatarMeshPrefab (itemDesc);
             return prefabs;
         }
 
         return null;
-    } 
+    }
 
     public static async void AssemblyAvatar (GameObject avatarGameObject, TAvatarEquipSetModel equipSet, int layer = 6) {
 
         TAvatarItemDescModel[] items = new TAvatarItemDescModel[6];
         GameObject[] prefabs = new GameObject[6];
 
-        var config = cxDefaultAvatarConfig.GetAvatarConfig();
+        var config = cxDefaultAvatarConfig.GetAvatarConfig ();
 
         prefabs[0] = await FindAvatarItem (equipSet.hairItemCode, config.defaultEquipSet.hairItemCode);
         prefabs[1] = await FindAvatarItem (equipSet.faceAccessoryItemCode, config.defaultEquipSet.faceAccessoryItemCode);
@@ -47,14 +46,28 @@ public static class cxAvatarMeshAssembly {
 
         avatarGameObject.GetComponent<Animator> ()?.Rebind ();
 #if UNITY_EDITOR
-        foreach (Transform t in avatarGameObject.GetComponentsInChildren<Transform>())
-        {            
-            if (t.gameObject.GetComponent<Renderer>() != null)
-            {
-                Material[] myMaterials = t.gameObject.GetComponent<Renderer>().materials;
-                foreach (Material material in myMaterials)
-                {
-                    material.shader = Shader.Find(material.shader.name);
+        foreach (Transform t in avatarGameObject.GetComponentsInChildren<Transform> ()) {
+            if (t.gameObject.GetComponent<Renderer> () != null) {
+                Material[] myMaterials = t.gameObject.GetComponent<Renderer> ().materials;
+                foreach (Material material in myMaterials) {
+                    material.shader = Shader.Find (material.shader.name);
+                }
+            }
+        }
+#endif
+    }
+
+    public static void AssemblyAvatar (GameObject avatarGameObject, List<GameObject> skinedMeshSources, int layer = 0) {
+        foreach (var prefab in skinedMeshSources)
+            AssemblyAvatar (avatarGameObject, prefab, layer);
+
+        avatarGameObject.GetComponent<Animator> ()?.Rebind ();
+#if UNITY_EDITOR
+        foreach (Transform t in avatarGameObject.GetComponentsInChildren<Transform> ()) {
+            if (t.gameObject.GetComponent<Renderer> () != null) {
+                Material[] myMaterials = t.gameObject.GetComponent<Renderer> ().materials;
+                foreach (Material material in myMaterials) {
+                    material.shader = Shader.Find (material.shader.name);
                 }
             }
         }
@@ -76,7 +89,10 @@ public static class cxAvatarMeshAssembly {
         }
 
         //할당된 오브젝트 제거
-        GameObject.Destroy (skinedMeshObj);
+        if (isEditingMode)
+            GameObject.DestroyImmediate (skinedMeshObj);
+        else
+            GameObject.Destroy (skinedMeshObj);
 
         gameObject.GetComponent<Animator> ()?.Rebind ();
     }
@@ -110,10 +126,24 @@ public static class cxAvatarMeshAssembly {
             NewRenderer.gameObject.layer = layer;
     }
 
+    public static bool isEditingMode {
+        get {
+            bool isEditingMode = false;
+#if UNITY_EDITOR
+            isEditingMode = !UnityEditor.EditorApplication.isPlaying;
+#endif
+            return isEditingMode;
+        }
+    }
+
     public static void ClearSkinnedMeshs (GameObject gameObject) {
+
         SkinnedMeshRenderer[] boneObjs = gameObject.GetComponentsInChildren<SkinnedMeshRenderer> ();
         foreach (SkinnedMeshRenderer newSmr in boneObjs) {
-            GameObject.Destroy (newSmr.gameObject);
+            if (isEditingMode)
+                GameObject.DestroyImmediate (newSmr.gameObject);
+            else
+                GameObject.Destroy (newSmr.gameObject);
         }
     }
 

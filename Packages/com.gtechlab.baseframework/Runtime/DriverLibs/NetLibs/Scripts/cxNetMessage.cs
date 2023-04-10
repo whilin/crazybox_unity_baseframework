@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 
 [Serializable]
-public class cxNetPacket { }
+public class cxNetMessage { }
 
 public enum NetRequestState
 {

@@ -1,11 +1,11 @@
 using System;
 using System.Threading.Tasks;
 
-class TGetResourceInfoRequest : cxNetPacket {
+class TGetResourceInfoRequest : cxNetMessage {
     public string resourceId;
 }
 
-class TGetResourceInfoResponse : cxNetPacket {
+class TGetResourceInfoResponse : cxNetMessage {
     public int resultCode;
     public cxResourceDescModel resourceDesc;
 }

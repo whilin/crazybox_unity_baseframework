@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using UnityEngine;
 
 public static class cxResourceNaming {
 
@@ -26,7 +28,7 @@ public static class cxResourceNaming {
             path = url.Substring (streamming.Length);
             return true;
         }
-
+  
         path = null;
         return false;
     }
@@ -88,5 +90,14 @@ public static class cxResourceNaming {
 #endif 
 
         return platformName;
+    }
+
+    public static string ToAppStreamingPath ( string path) {
+        var newPath = Path.Combine(Application.streamingAssetsPath , path);
+
+#if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+        newPath = "file://" + newPath;
+#endif
+        return newPath;
     }
 }

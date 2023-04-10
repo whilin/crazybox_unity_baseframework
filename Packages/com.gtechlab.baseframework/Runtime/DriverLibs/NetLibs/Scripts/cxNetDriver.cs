@@ -56,7 +56,7 @@ public class cxNetDriver {
         return ApiEndPoint + ( apiName.StartsWith("/") ? apiName : "/"+apiName);
     }
 
-    public async void Request<ResT> (String apiName, object reqPacket, Action<NetRequestState, ResT> callback) where ResT : cxNetPacket {
+    public async void Request<ResT> (String apiName, object reqPacket, Action<NetRequestState, ResT> callback) where ResT : cxNetMessage {
 
         callback (NetRequestState.Pending, null);
 
@@ -68,7 +68,7 @@ public class cxNetDriver {
         }
     }
 
-    public async Task<ResT> RequestAsync<ResT> (HTTP_METHOD method, String apiName, object reqPacket) where ResT : cxNetPacket {
+    public async Task<ResT> RequestAsync<ResT> (HTTP_METHOD method, String apiName, object reqPacket) where ResT : cxNetMessage {
         String json = Newtonsoft.Json.JsonConvert.SerializeObject (reqPacket);
 
         String url = GetURL(apiName);
@@ -208,7 +208,7 @@ public class cxNetDriver {
         }
     }
 
-    public async Task<ResT> PostMultipartNot<ResT> (string apiName, cxNetFormFields parameters) where ResT : cxNetPacket {
+    public async Task<ResT> PostMultipartNot<ResT> (string apiName, cxNetFormFields parameters) where ResT : cxNetMessage {
         String url = GetURL(apiName);
 
         if (verbose)

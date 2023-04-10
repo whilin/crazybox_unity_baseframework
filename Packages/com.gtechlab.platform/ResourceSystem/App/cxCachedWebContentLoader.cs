@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Video;
 
 public class cxCachedWebContentLoader : cxSingleton<cxCachedWebContentLoader> {
 
@@ -51,9 +52,9 @@ public class cxCachedWebContentLoader : cxSingleton<cxCachedWebContentLoader> {
         cachedContents.Clear ();
     }
 
-    public bool HasCache(string url) {
-        var cached = Find(url);
-        return cached !=null && cached.state.Value == LoadingState.Loaded;
+    public bool HasCache (string url) {
+        var cached = Find (url);
+        return cached != null && cached.state.Value == LoadingState.Loaded;
     }
 
     public async Task<T> LoadAsset<T> (string url) where T : UnityEngine.Object {
@@ -147,7 +148,13 @@ public class cxCachedWebContentLoader : cxSingleton<cxCachedWebContentLoader> {
 
             if (cxResourceNaming.IsStreaming (url, out string path)) {
                 isNet = true;
-                url = Path.Combine (Application.streamingAssetsPath, path);
+                url = cxResourceNaming.ToAppStreamingPath(path);
+
+//                 url = Path.Combine (Application.streamingAssetsPath, path);
+
+// #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+//                 url ="file://"+ url;
+// #endif
             }
 
             UnityEngine.Object content = null;
@@ -157,6 +164,10 @@ public class cxCachedWebContentLoader : cxSingleton<cxCachedWebContentLoader> {
                     content = ToSprite (texture);
             } else if (contentType == typeof (Texture2D)) {
                 content = await DownloadImage (url);
+            } else if(contentType == typeof(VideoClip)) {
+                throw new Exception("cxCachedWebContent not support videoClip");
+            } else {
+                throw new Exception("cxCachedWebContent unsupported type:"+nameof(contentType));
             }
 
             /*

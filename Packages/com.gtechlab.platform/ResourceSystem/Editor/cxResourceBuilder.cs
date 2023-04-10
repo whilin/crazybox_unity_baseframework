@@ -204,8 +204,8 @@ public abstract class cxResourceBuilder {
 
     [MenuItem ("Tools/G-Tech Lab/Debug/Upload Test")]
     static void UploadTest () {
-        var pkg = "/Users/CRAZYBOX_SVN_ROOT/crazybox_package_project/BundleBuild/com.gtechlab.sample.01.cxpackage";
-        UploadPackage ("com.gtechlab.sample.01", pkg);
+        var pkg = "./BundleBuild/com.edutec.mw.mode.100.cxpackage";
+        UploadPackage ("com.edutec.mw.mode.100", pkg);
     }
 
     public static void UploadPackage (string resourceId, string pkgFile) {
