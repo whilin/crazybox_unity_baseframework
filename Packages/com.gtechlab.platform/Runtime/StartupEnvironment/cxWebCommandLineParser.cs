@@ -10,7 +10,7 @@ public static class cxWebCommandLineParser {
         var queryStrings = ParseQueryString (startURL);
 
         if (queryStrings.TryGetValue ("decodedToken", out string decodedToken)) {
-            byte[] byte64 = Convert.FromBase64String (decodedToken);
+            byte[] byte64 = Convert.FromBase64String (DecodeSafeBase64(decodedToken));
             string json = Encoding.UTF8.GetString (byte64);
 
             var parameter = Newtonsoft.Json.JsonConvert.DeserializeObject<T> (json);
@@ -23,7 +23,19 @@ public static class cxWebCommandLineParser {
 
         throw new ArgumentException ("cxWebStartupParser Exception, paramter not found:" + startURL);
     }
-
+    static string DecodeSafeBase64 (string url) {
+        string incoming = url
+            .Replace ('_', '/').Replace ('-', '+');
+        switch (url.Length % 4) {
+            case 2:
+                incoming += "==";
+                break;
+            case 3:
+                incoming += "=";
+                break;
+        }
+        return incoming;
+    }
     public static Dictionary<string, string> ParseQueryString (string startURL) {
         Debug.Log ("ParseQueryString url:" + startURL);
 
@@ -32,7 +44,11 @@ public static class cxWebCommandLineParser {
 
         for (int i = 1; i < parts.Length; i++) {
             string[] keyValue = parts[i].Split ('=');
-            queryStrings.Add (keyValue[0], keyValue.Length > 1 ? keyValue[1] : string.Empty);
+            string values = string.Empty;
+            for (int j = 1; j < keyValue.Length; j++)
+                values += keyValue[j];
+
+            queryStrings.Add (keyValue[0], values);
         }
 
         return queryStrings;
