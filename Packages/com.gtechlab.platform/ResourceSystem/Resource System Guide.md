@@ -33,6 +33,7 @@ bundleData.LoadScene("");
 CXURL 표기법을 사용
     "" builtin
     resource://<resouceId>/<only object name without ext>
+    resource://<resouceId>/  (use default assest)
     bundle://<bundlename>/<only object name without ext>
     streaming://<streaming path 이하의 full path with ext>
     http://<full path>
