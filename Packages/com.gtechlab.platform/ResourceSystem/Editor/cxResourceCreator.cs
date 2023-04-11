@@ -80,7 +80,7 @@ public abstract class cxResourceCreator {
         desc.resourceType = input.resourceType;
         desc.version = input.version;
 
-        string path = resourcePath + "/" + input.resourceId + ".asset";
+        string path = resourcePath + "/" +  "resourceDefinition.asset";
         AssetDatabase.CreateAsset (desc, path);
         AssetDatabase.SaveAssets ();
         AssetDatabase.Refresh ();

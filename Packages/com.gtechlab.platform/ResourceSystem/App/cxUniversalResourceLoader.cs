@@ -30,8 +30,8 @@ public class cxUniversalResourceLoader : cxSingleton<cxUniversalResourceLoader> 
             return obj;
         } else if (cxResourceNaming.IsBundle (url, out string bundleName, out string path)) {
             var bundleData = cxOnDemandBundleLoader.Instance.LoadBundle (bundleName);
-               if(bundleData == null)
-                throw new Exception("cxUniversalResourceLoader.LoadScene bundle not found:"+bundleName);
+            if (bundleData == null)
+                throw new Exception ("cxUniversalResourceLoader.LoadScene bundle not found:" + bundleName);
 
             await bundleData.WaitForLoad ((float p) => {
                 if (onProgress != null)
@@ -42,13 +42,16 @@ public class cxUniversalResourceLoader : cxSingleton<cxUniversalResourceLoader> 
             return obj;
         } else if (cxResourceNaming.IsResource (url, out string resourceId, out path)) {
             var bundleData = await cxResourceBundleLoader.Instance.LoadBundle (resourceId);
-               if(bundleData == null)
-                throw new Exception("cxUniversalResourceLoader.LoadScene resourceBundle not found:"+resourceId);
+            if (bundleData == null)
+                throw new Exception ("cxUniversalResourceLoader.LoadScene resourceBundle not found:" + resourceId);
 
             await bundleData.WaitForLoad ((float p) => {
                 if (onProgress != null)
                     onProgress (p);
             });
+
+            if (string.IsNullOrEmpty (path))
+                path = bundleData.GetMainAssetName ();
 
             var obj = bundleData.assetBundle.LoadAsset<T> (path);
             return obj;
@@ -69,8 +72,8 @@ public class cxUniversalResourceLoader : cxSingleton<cxUniversalResourceLoader> 
         } else if (cxResourceNaming.IsBundle (url, out string bundleName, out path)) {
 
             var bundleData = cxOnDemandBundleLoader.Instance.LoadBundle (bundleName);
-            if(bundleData == null)
-                throw new Exception("cxUniversalResourceLoader.LoadScene bundle not found:"+bundleName);
+            if (bundleData == null)
+                throw new Exception ("cxUniversalResourceLoader.LoadScene bundle not found:" + bundleName);
 
             await bundleData.WaitForLoad ((float p) => {
                 if (onProgress != null)
@@ -79,35 +82,44 @@ public class cxUniversalResourceLoader : cxSingleton<cxUniversalResourceLoader> 
 
         } else if (cxResourceNaming.IsResource (url, out string resourceId, out path)) {
             var bundleData = await cxResourceBundleLoader.Instance.LoadBundle (resourceId);
-              if(bundleData == null)
-                throw new Exception("cxUniversalResourceLoader.LoadScene resourceBundle not found:"+resourceId);
+            if (bundleData == null)
+                throw new Exception ("cxUniversalResourceLoader.LoadScene resourceBundle not found:" + resourceId);
 
             await bundleData.WaitForLoad ((float p) => {
                 if (onProgress != null)
                     onProgress (p);
             });
 
+            if (string.IsNullOrEmpty (path))
+                path = bundleData.GetMainAssetName ();
+
         } else {
             throw new Exception ("cxUniversalResourceLoader.LoadScene unsupported url schema:" + url);
         }
 
-        var asyncOp = SceneManager.LoadSceneAsync (path, loadSceneMode);
-        //asyncOp.allowSceneActivation = false;
+        try {
+            var asyncOp = SceneManager.LoadSceneAsync (path, loadSceneMode);
+            //asyncOp.allowSceneActivation = false;
 
-        // bool isDone = false;
-        // do {
-        //     await new WaitForUpdate ();
-        //     if (onProgress != null)
-        //         onProgress (asyncOp.progress);
+            // bool isDone = false;
+            // do {
+            //     await new WaitForUpdate ();
+            //     if (onProgress != null)
+            //         onProgress (asyncOp.progress);
 
-        //     if (asyncOp.progress >= 0.8)
-        //         isDone = true;
+            //     if (asyncOp.progress >= 0.8)
+            //         isDone = true;
 
-        // } while (!isDone);
+            // } while (!isDone);
 
-        await asyncOp;
+            await asyncOp;
 
-        //asyncOp.allowSceneActivation = true;
+            //asyncOp.allowSceneActivation = true;
+        } catch (Exception ex) {
+            Debug.LogException (ex);
+            throw new Exception ("cxUniversalResourceLoader.LoadScene scene open failed:" + url);
+
+        }
 
         return SceneManager.GetSceneByName (path);
     }

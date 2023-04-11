@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UniRx;
@@ -21,7 +22,7 @@ public class cxResourceBundleData {
     public cxResourceDescModel resourceDesc;
 
     public AssetBundle assetBundle;
-   
+
     public bool cached;
     public BehaviorSubject<BundleLoadState> state = new BehaviorSubject<BundleLoadState> (BundleLoadState.Unloaded);
     public BehaviorSubject<float> loadingProg = new BehaviorSubject<float> (0);
@@ -54,6 +55,24 @@ public class cxResourceBundleData {
     public bool IsCached () {
         return cxResourceBundleLoader.Instance.HasCachedVersion (resourceDesc.resourceId, resourceDesc.bundleHash);
     }
+
+    public string GetMainAssetName () {
+        foreach (var fileInfo in resourceDesc.assetFiles) {
+
+            if (resourceDesc.resourceType == cxResourceType.Scene) {
+                if (fileInfo.fileType == cxResourceAssetFileType.BundleScene) {
+                    var onlyFilename = Path.GetFileNameWithoutExtension (fileInfo.filename);
+                    return onlyFilename;
+                }
+            } else {
+
+                var onlyFilename = Path.GetFileNameWithoutExtension (fileInfo.filename);
+                return onlyFilename;
+            }
+        }
+
+        return null;
+    }
 }
 
 public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
@@ -65,26 +84,26 @@ public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
     private string resourceLocation;
     private string platformName;
 
-    public static void Create (cxIResourceInfoRepository resourceInfoRepository,  string resourceLocation) {
+    public static void Create (cxIResourceInfoRepository resourceInfoRepository, string resourceLocation) {
         cxResourceBundleLoader.Instance.resourceInfoRepository = resourceInfoRepository;
         cxResourceBundleLoader.Instance.resourceLocation = resourceLocation;
-        cxResourceBundleLoader.Instance.platformName = cxResourceNaming.GetActivePlatformName();
+        cxResourceBundleLoader.Instance.platformName = cxResourceNaming.GetActivePlatformName ();
     }
 
-    private async Task<cxResourceDescModel> FindResourceInfo(string resourceId) {
+    private async Task<cxResourceDescModel> FindResourceInfo (string resourceId) {
 
-        var resourceDesc = resourceDescList.Find(q => q.resourceId == resourceId);
-        if(resourceDesc !=null)
+        var resourceDesc = resourceDescList.Find (q => q.resourceId == resourceId);
+        if (resourceDesc != null)
             return resourceDesc;
 
         resourceDesc = await resourceInfoRepository.FindResourceInfo (resourceId);
         if (resourceDesc != null) {
-            resourceDescList.Add(resourceDesc);
+            resourceDescList.Add (resourceDesc);
             return resourceDesc;
         }
 
         Debug.Log ("FindResourceInfo not found:" + resourceId);
-        return null; 
+        return null;
     }
 
     public async Task<cxResourceBundleData> GetBundleData (string resourceId) {
@@ -98,8 +117,8 @@ public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
             if (resourceDesc == null) {
                 Debug.Log ("GetBundleData BundleDesc not found:" + resourceId);
                 return null;
-            } 
-            
+            }
+
             lock (chunks) {
                 chunk = new cxResourceBundleData () {
                     resourceDesc = resourceDesc
@@ -109,10 +128,10 @@ public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
                 chunk.cached = cached;
                 chunk.state.OnNext (cxResourceBundleData.BundleLoadState.Unloaded);
 
-                if(!chunks.Exists(q => q.resourceDesc.resourceId == chunk.resourceDesc.resourceId))
+                if (!chunks.Exists (q => q.resourceDesc.resourceId == chunk.resourceDesc.resourceId))
                     chunks.Add (chunk);
                 else {
-                    Debug.LogWarning("GetBundleData Add failed: already :"+chunk.resourceDesc.resourceId);
+                    Debug.LogWarning ("GetBundleData Add failed: already :" + chunk.resourceDesc.resourceId);
                 }
             }
         }
@@ -153,15 +172,14 @@ public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
 
     public bool HasCachedVersion (string resourceId, string hash) {
 
-        string uri = resourceId;// cxResourceNaming.GetBundleURL (resourceLocation, resourceId, platformName);
+        string uri = resourceId; // cxResourceNaming.GetBundleURL (resourceLocation, resourceId, platformName);
 
         var hash128 = Hash128.Parse (hash);
 
         int count = Caching.cacheCount;
 
-        List<string> cacheList = new List<string>();
-        Caching.GetAllCachePaths(cacheList);
-
+        List<string> cacheList = new List<string> ();
+        Caching.GetAllCachePaths (cacheList);
 
         List<Hash128> cachedVersions = new List<Hash128> ();
         Caching.GetCachedVersions (uri, cachedVersions);
@@ -197,7 +215,7 @@ public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
                 throw new Exception ("Bundle Load Exception :" + resourceId + " exception:" + req.error);
             }
 
-           // Caching.AddCache(uri);
+            // Caching.AddCache(uri);
 
             if (downloadState != null)
                 downloadState (0);

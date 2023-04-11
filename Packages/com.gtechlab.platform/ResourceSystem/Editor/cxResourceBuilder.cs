@@ -89,10 +89,11 @@ public abstract class cxResourceBuilder {
             //return false;
         }
 
-        if (!fileName.Equals (def.resourceId)) {
-            throw new Exception ($"{path} must have same name with resourceId");
-            // return false;
-        }
+        // 이 옵션 해제
+        // if (!fileName.Equals (def.resourceId)) {
+        //     throw new Exception ($"{path} must have same name with resourceId");
+        //     // return false;
+        // }
 
         var sceneFiles = cxBundleBuilderUtil.QueryFilesInPath (path, true);
         var assetFiles = cxBundleBuilderUtil.QueryFilesInPath (path, false);

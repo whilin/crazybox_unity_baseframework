@@ -54,11 +54,11 @@ public static class cxResourceNaming {
         if (url.StartsWith (resource)) {
             var fullPath = url.Substring (resource.Length);
             var names = fullPath.Split ("/");
-            if (names.Length != 2)
-                throw new Exception ("Universal Resource Name Exception :" + url);
+            // if (names.Length != 2)
+            //     throw new Exception ("Universal Resource Name Exception :" + url);
 
             resourceId = names[0];
-            path = names[1];
+            path = (names.Length > 1) ? names[1] : string.Empty;
             return true;
         }
 
