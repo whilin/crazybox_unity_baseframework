@@ -5,7 +5,7 @@ using UnityEngine;
 public class cxDefaultPlayerCommand : cxAbstractPlayerCommand {
     public override void ExecuteSpawn (cxAbstractPlayerObject playerController) {
         var camera = cxAbstractSceneController.Instance.GetPlayerCamera ();
-        camera.Follow (playerController.playerCameraTarget);
+        camera.Follow (playerController.playerCameraTarget, cxPlayerCameraController.CameraFollowMode.OrbitFollow);
     }
 
     public override void ExecuteLookAt (cxAbstractPlayerObject playerController, cxTrigger trigger) {
@@ -18,7 +18,7 @@ public class cxDefaultPlayerCommand : cxAbstractPlayerCommand {
     public override void ExecuteLookAtReleased (cxAbstractPlayerObject playerController) {
         var camera = cxAbstractSceneController.Instance.GetPlayerCamera ();
         //        cxUINavigator.Instance.FindFrame<mcUILobbySceneV2Frame> ()?.SetActiveNameTag (true);
-        camera.Follow (playerController.playerCameraTarget);
+        camera.Follow (playerController.playerCameraTarget, cxPlayerCameraController.CameraFollowMode.OrbitFollow);
     }
 
     public override void ExecuteTouchCommand (cxTrigger trigger) {

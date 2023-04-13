@@ -18,9 +18,16 @@ public class cxAvatarStateInput {
     public Quaternion sitRotation;
     public bool stand;
 
+    // public bool moveTo;
+    // public Vector3 moveToPos;
+
     public void MoveInput (Vector2 newMoveDirection) {
         move = newMoveDirection;
     }
+    // public void MoveToInput (Vector2 moveToPos) {
+    //     moveTo = true;
+    //     this.moveToPos = moveToPos;
+    // }
 
     public void LookInput (Vector2 newLookDirection) {
         look = newLookDirection;
@@ -51,6 +58,7 @@ public class cxAvatarStateInput {
         stand = false;
         move = Vector2.zero;
         jump = false;
+        //moveTo = false;
     }
 
     public void Consumed2 () {

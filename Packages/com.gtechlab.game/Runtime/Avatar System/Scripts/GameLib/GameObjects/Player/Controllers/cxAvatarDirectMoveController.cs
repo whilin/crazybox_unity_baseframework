@@ -68,6 +68,7 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
     private Animator _animator;
     private CharacterController _controller;
     private cxAvatarLocalStateController _stateController;
+    private cxAvatarKeyInputController keyInputController;
 
     private const float _threshold = 0.01f;
 
@@ -77,6 +78,7 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
         _hasAnimator = TryGetComponent (out _animator);
         _controller = GetComponent<CharacterController> ();
         _stateController = GetComponent<cxAvatarLocalStateController> ();
+        keyInputController = GetComponent<cxAvatarKeyInputController>();
     }
 
     private void Start () {
@@ -95,12 +97,12 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
 
         Move ();
 
-        _stateController.stateInput.Consumed ();
+        keyInputController.stateInput.Consumed ();
     }
 
     private void LateUpdate () {
         //CameraRotation();
-        _stateController.stateInput.Consumed2 ();
+        keyInputController.stateInput.Consumed2 ();
     }
 
     private void GroundedCheck () {
@@ -172,13 +174,13 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
 
     private void Move () {
         // set target speed based on move speed, sprint speed and if sprint is pressed
-        float targetSpeed = _stateController.stateInput.sprint ? SprintSpeed : MoveSpeed;
+        float targetSpeed = keyInputController.stateInput.sprint ? SprintSpeed : MoveSpeed;
 
         // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
         // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
         // if there is no input, set the target speed to 0
-        if (_stateController.stateInput.move == Vector2.zero) targetSpeed = 0.0f;
+        if (keyInputController.stateInput.move == Vector2.zero) targetSpeed = 0.0f;
 
         // a reference to the players current horizontal velocity
         float currentHorizontalSpeed = new Vector3 (_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
@@ -186,25 +188,30 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
         float speedOffset = 0.1f;
         float inputMagnitude = 1f;
 
+        bool accelState = targetSpeed > currentHorizontalSpeed;
+        float speedChangeLerpTime = accelState ?  Time.deltaTime * SpeedChangeRate :  Time.deltaTime * 10.0f;
+
         // accelerate or decelerate to target speed
         if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset) {
             // creates curved result rather than a linear one giving a more organic speed change
             // note T in Lerp is clamped, so we don't need to clamp our speed
-            _speed = Mathf.Lerp (currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * SpeedChangeRate);
+
+            _speed = Mathf.Lerp (currentHorizontalSpeed, targetSpeed * inputMagnitude, speedChangeLerpTime);
 
             // round speed to 3 decimal places
             _speed = Mathf.Round (_speed * 1000f) / 1000f;
         } else {
             _speed = targetSpeed;
         }
-        _animationBlend = Mathf.Lerp (_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+
+        _animationBlend = Mathf.Lerp (_animationBlend, targetSpeed, speedChangeLerpTime);
 
         // normalise input direction
-        Vector3 inputDirection = new Vector3 (_stateController.stateInput.move.x, 0, _stateController.stateInput.move.y).normalized;
+        Vector3 inputDirection = new Vector3 (keyInputController.stateInput.move.x, 0, keyInputController.stateInput.move.y).normalized;
 
         // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
         // if there is a move input rotate player when the player is moving
-        if (_stateController.stateInput.move != Vector2.zero) {
+        if (keyInputController.stateInput.move != Vector2.zero) {
 
             var playerCamera = cxAbstractSceneController.Instance.GetPlayerCamera();
             
@@ -251,7 +258,7 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
             }
 
             // Jump
-            if (_stateController.stateInput.jump && _jumpTimeoutDelta <= 0.0f) {
+            if (keyInputController.stateInput.jump && _jumpTimeoutDelta <= 0.0f) {
                 // the square root of H * -2 * G = how much velocity needed to reach desired height
                 _verticalVelocity = Mathf.Sqrt (JumpHeight * -2f * Gravity);
 
@@ -284,7 +291,7 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
             }
 
             // if we are not grounded, do not jump
-            _stateController.stateInput.jump = false;
+            keyInputController.stateInput.jump = false;
         }
 
         // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
