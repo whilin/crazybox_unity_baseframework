@@ -6,7 +6,9 @@ public class cxAvatarKeyInputController : MonoBehaviour {
     // public cxAvatarStateOutput stateOutput { get; private set; } = new cxAvatarStateOutput ();    private cxAbstractPlayerCommand playerCommand;
     public cxAvatarStateInput stateInput { get; private set; } = new cxAvatarStateInput ();
 
-    public float rotateSpeed = 10.0f;
+    public bool enableClickNMove= true;
+    public bool enableDirectMove = true;
+    public float rotateKeySensitive = 10.0f;
     private cxAbstractPlayerCommand playerCommand;
     private cxAvatarLocalStateController localStateController;
 
@@ -89,10 +91,12 @@ public class cxAvatarKeyInputController : MonoBehaviour {
             // Hold(false);
         }
 
-        stateInput.MoveInput (move);
-        stateInput.SprintInput (run);
-        stateInput.JumpInput (jump);
-        stateInput.LookInput (look * rotateSpeed);
+        if(enableDirectMove) {
+            stateInput.MoveInput (move);
+            stateInput.SprintInput (run);
+            stateInput.JumpInput (jump);
+            stateInput.LookInput (look * rotateKeySensitive);
+        }
     }
 
     private void HandleMouseInput () {
@@ -110,7 +114,9 @@ public class cxAvatarKeyInputController : MonoBehaviour {
 
                     if ((hitLayerMask & localStateController.movingGroundMask.value) != 0) {
                        // stateInput.MoveToInput (hitted.point);
-                       localStateController.SetMoveToPosition(hitted.point);
+                       if(enableClickNMove)
+                            localStateController.SetMoveToPosition(hitted.point);
+
                     } else if (hitLayerMask == 256) {
                         Debug.Log ("hitted : " + hitted.transform.gameObject.name);
                         var trigger = hitted.transform.gameObject.GetComponent<cxTrigger> ();

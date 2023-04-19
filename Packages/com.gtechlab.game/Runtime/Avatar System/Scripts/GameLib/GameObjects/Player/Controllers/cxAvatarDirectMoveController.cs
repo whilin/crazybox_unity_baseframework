@@ -78,7 +78,7 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
         _hasAnimator = TryGetComponent (out _animator);
         _controller = GetComponent<CharacterController> ();
         _stateController = GetComponent<cxAvatarLocalStateController> ();
-        keyInputController = GetComponent<cxAvatarKeyInputController>();
+        keyInputController = GetComponent<cxAvatarKeyInputController> ();
     }
 
     private void Start () {
@@ -129,6 +129,17 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
         Collider[] results = new Collider[100];
         Grounded = physicsScene.OverlapSphere (spherePosition, GroundedRadius, results, GroundLayers, QueryTriggerInteraction.Ignore) > 0;
 
+        Grounded = false;
+        foreach (var re in results) {
+            if (re == null)
+                break;
+
+            if (re.gameObject == gameObject)
+                continue;
+
+            Grounded = true;
+        }
+
         _stateController.stateOutput.grounded = Grounded;
 
         // update animator if using character
@@ -140,19 +151,17 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
         //     Debug.Log("Landing...");
         // }
     }
-    
+
     public bool GroundedCheckForRemotePlayer () {
 
-      
         //Scene Physics로 변경해봄!
         var physicsScene = gameObject.scene.GetPhysicsScene ();
-
 
         Vector3 spherePosition = new Vector3 (transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
         Collider[] results = new Collider[100];
         bool grounded = physicsScene.OverlapSphere (spherePosition, GroundedRadius, results, GroundLayers, QueryTriggerInteraction.Ignore) > 0;
 
-       return grounded;
+        return grounded;
     }
 
     // private void CameraRotation () {
@@ -188,23 +197,30 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
         float speedOffset = 0.1f;
         float inputMagnitude = 1f;
 
-        bool accelState = targetSpeed > currentHorizontalSpeed;
-        float speedChangeLerpTime = accelState ?  Time.deltaTime * SpeedChangeRate :  Time.deltaTime * 10.0f;
+        if (Grounded) {
+            bool accelState = targetSpeed > currentHorizontalSpeed;
 
-        // accelerate or decelerate to target speed
-        if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset) {
-            // creates curved result rather than a linear one giving a more organic speed change
-            // note T in Lerp is clamped, so we don't need to clamp our speed
+            var speedChangeLerpTime = accelState ? Time.deltaTime * SpeedChangeRate : Time.deltaTime * 10.0f;
 
-            _speed = Mathf.Lerp (currentHorizontalSpeed, targetSpeed * inputMagnitude, speedChangeLerpTime);
+            // accelerate or decelerate to target speed
+            if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset) {
+                // creates curved result rather than a linear one giving a more organic speed change
+                // note T in Lerp is clamped, so we don't need to clamp our speed
 
-            // round speed to 3 decimal places
-            _speed = Mathf.Round (_speed * 1000f) / 1000f;
+                _speed = Mathf.Lerp (currentHorizontalSpeed, targetSpeed * inputMagnitude, speedChangeLerpTime);
+
+                // round speed to 3 decimal places
+                _speed = Mathf.Round (_speed * 1000f) / 1000f;
+            } else {
+                _speed = targetSpeed;
+            }
         } else {
-            _speed = targetSpeed;
+            //공중에서 기존 속도 유지
+            var speedChangeLerpTime = Time.deltaTime * SpeedChangeRate;
+            targetSpeed = Mathf.Lerp (_speed, 0, speedChangeLerpTime);
         }
 
-        _animationBlend = Mathf.Lerp (_animationBlend, targetSpeed, speedChangeLerpTime);
+        //_animationBlend = Mathf.Lerp (_animationBlend, targetSpeed, speedChangeLerpTime);
 
         // normalise input direction
         Vector3 inputDirection = new Vector3 (keyInputController.stateInput.move.x, 0, keyInputController.stateInput.move.y).normalized;
@@ -213,8 +229,8 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
         // if there is a move input rotate player when the player is moving
         if (keyInputController.stateInput.move != Vector2.zero) {
 
-            var playerCamera = cxAbstractSceneController.Instance.GetPlayerCamera();
-            
+            var playerCamera = cxAbstractSceneController.Instance.GetPlayerCamera ();
+
             _targetRotation = Mathf.Atan2 (inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + playerCamera.transform.eulerAngles.y;
             float rotation = Mathf.SmoothDampAngle (transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
 
@@ -233,7 +249,7 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
         //     _animator.SetFloat (_animIDMotionSpeed, inputMagnitude);
         // }
 
-        _stateController.stateOutput.speed = _speed;// Mathf.Lerp (0, SprintSpeed, _speed);
+        _stateController.stateOutput.speed = _speed; // Mathf.Lerp (0, SprintSpeed, _speed);
     }
 
     private void JumpAndGravity () {

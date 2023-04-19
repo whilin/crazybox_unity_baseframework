@@ -8,7 +8,9 @@ public class cxDefaultAvatarConfig : ScriptableObject
     public GameObject playerControllerSetup;
     public GameObject playerViewerSetup;
 
+    //[AssetPath.Attribute(typeof(Object))]
     public string avatarMeshBasePath;
+    //[AssetPath.Attribute(typeof(Object))]
     public string avatarDataTablePath;
 
     public TAvatarEquipSetModel defaultEquipSet;

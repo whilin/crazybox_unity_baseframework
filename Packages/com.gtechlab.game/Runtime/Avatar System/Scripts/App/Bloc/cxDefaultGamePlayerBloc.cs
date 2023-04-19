@@ -6,7 +6,11 @@ using UnityEngine;
 
 public class cxDefaultGamePlayerBloc : cxIGamePlayerBloc {
     BehaviorSubject<cxTGameDataLoadState> loadState = new BehaviorSubject<cxTGameDataLoadState> (cxTGameDataLoadState.Unloaded);
-    public override IObservable<cxTGameDataLoadState> LoadStateAsObservable () => loadState.AsObservable ();
+    public override IObservable<cxTGameDataLoadState> LoadStateAsObservable  => loadState.AsObservable ();
+
+    public override IObservable<TAvatarProfileModel> ProfileAsObservable => throw new NotImplementedException();
+
+    public override IObservable<TAvatarEquipSetModel> AvatarEquipSetAsObservale => throw new NotImplementedException();
 
     TAvatarProfileModel myProfile;
 
@@ -60,5 +64,15 @@ public class cxDefaultGamePlayerBloc : cxIGamePlayerBloc {
         var json = JsonConvert.SerializeObject (myProfile);
         PlayerPrefs.SetString ("saved_my_profile", json);
         PlayerPrefs.Save ();
+    }
+
+    public override void ChangeAvatarEquipSet(TAvatarEquipSetModel equipSet)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void ChangeUserProfile(TAvatarProfileModel profile)
+    {
+        throw new NotImplementedException();
     }
 }

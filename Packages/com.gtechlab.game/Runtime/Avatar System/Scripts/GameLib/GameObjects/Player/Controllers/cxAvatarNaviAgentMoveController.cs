@@ -6,7 +6,7 @@ using UnityEngine.AI;
 [RequireComponent (typeof (NavMeshAgent))]
 [RequireComponent (typeof (Animator))]
 public sealed class cxAvatarNaviAgentMoveController : MonoBehaviour {
-    private NavMeshAgent naviMeshAgent;
+    private NavMeshAgent navAgent;
     private Animator animator;
 
     private bool moving;
@@ -19,25 +19,32 @@ public sealed class cxAvatarNaviAgentMoveController : MonoBehaviour {
 
     private cxAvatarLocalStateController _stateController;
 
-
     private void Awake () {
-        naviMeshAgent = GetComponent<NavMeshAgent> ();
+        navAgent = GetComponent<NavMeshAgent> ();
         animator = GetComponent<Animator> ();
-         _stateController = GetComponent<cxAvatarLocalStateController>();
+        _stateController = GetComponent<cxAvatarLocalStateController> ();
     }
 
     private void Start () {
         moving = false;
-        naviMeshAgent.updatePosition = false;
+        navAgent.updatePosition = false;
+    }
+
+    private void OnEnable () {
+        navAgent.enabled = true;
+    }
+
+    private void OnDisable () {
+        navAgent.enabled = false;
     }
 
     public bool MoveTo (Vector3 pos) {
-        naviMeshAgent.updatePosition  = false;
 
         if (NavMesh.SamplePosition (pos, out NavMeshHit navHit, 1.0f, NavMesh.AllAreas)) {
-            naviMeshAgent.SetDestination (navHit.position);
+            navAgent.isStopped = false;
+            navAgent.updatePosition = false;
+            navAgent.SetDestination (navHit.position);
             moving = true;
-            naviMeshAgent.isStopped = false;
             return true;
         }
 
@@ -46,20 +53,19 @@ public sealed class cxAvatarNaviAgentMoveController : MonoBehaviour {
 
     public void Stop () {
         moving = false;
-        naviMeshAgent.isStopped = true;
-        animator.SetFloat ("Speed", 0);
-
-        naviMeshAgent.updatePosition  = true;
+        navAgent.isStopped = true;
+        // animator.SetFloat ("Speed", 0);
+        navAgent.updatePosition = true;
     }
 
     // Update is called once per frame
     void Update () {
-        _stateController.stateOutput.Reset();
-        
+        _stateController.stateOutput.Reset ();
+
         if (moving) {
             UpdateNavi ();
 
-            float d = Vector3.Distance (naviMeshAgent.destination, transform.position);
+            float d = Vector3.Distance (navAgent.destination, transform.position);
             if (d < stopDistance) {
                 Stop ();
             }
@@ -67,7 +73,7 @@ public sealed class cxAvatarNaviAgentMoveController : MonoBehaviour {
     }
 
     void UpdateNavi () {
-        Vector3 worldDeltaPosition = naviMeshAgent.nextPosition - transform.position;
+        Vector3 worldDeltaPosition = navAgent.nextPosition - transform.position;
 
         // Map 'worldDeltaPosition' to local space
         float dx = Vector3.Dot (transform.right, worldDeltaPosition);
@@ -83,9 +89,10 @@ public sealed class cxAvatarNaviAgentMoveController : MonoBehaviour {
                     if (Time.deltaTime > 1e-5f)
                         velocity = smoothDeltaPosition / Time.deltaTime;
         */
+
         velocity = deltaPosition / Time.deltaTime;
 
-        velocity = worldDeltaPosition / Time.deltaTime;
+        //velocity = worldDeltaPosition / Time.deltaTime;
 
         _stateController.stateOutput.speed = velocity.magnitude;
 
@@ -102,7 +109,7 @@ public sealed class cxAvatarNaviAgentMoveController : MonoBehaviour {
 
         // GetComponent<LookAt>().lookAtTargetPosition = agent.steeringTarget + transform.forward;
 
-        transform.position = naviMeshAgent.nextPosition;
+        transform.position = navAgent.nextPosition;
 
         //  var targetForward = naviMeshAgent.nextPosition - transform.position;
         //  var targetRotation = Quaternion.LookRotation(targetForward, Vector3.up);
@@ -110,14 +117,12 @@ public sealed class cxAvatarNaviAgentMoveController : MonoBehaviour {
 
     }
 
-    public void ResetNavMeshAgent()
-    {
-        naviMeshAgent.enabled = false;
-        StartCoroutine(WaitSetNavMeshAgent());
+    public void ResetNavMeshAgent () {
+        navAgent.enabled = false;
+        StartCoroutine (WaitSetNavMeshAgent ());
     }
-    IEnumerator WaitSetNavMeshAgent()
-    {
-        yield return new WaitForSeconds(0.1f);
-        naviMeshAgent.enabled = true;
+    IEnumerator WaitSetNavMeshAgent () {
+        yield return new WaitForSeconds (0.1f);
+        navAgent.enabled = true;
     }
 }

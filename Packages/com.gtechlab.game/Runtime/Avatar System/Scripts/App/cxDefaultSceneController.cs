@@ -14,13 +14,13 @@ public class cxDefaultSceneController : cxAbstractSceneController {
 
     private void Start () {
 
-        cxGetIt.Get<cxIGamePlayerBloc> ().LoadStateAsObservable ()
+        cxGetIt.Get<cxIGamePlayerBloc> ().LoadStateAsObservable 
             .Where (state => state == cxTGameDataLoadState.Loaded)
             .Subscribe (state =>
                 SpwanMyPlayerObject ()
             );
 
-        cxGetIt.Get<cxIGamePlayerBloc> ().LoadStateAsObservable ()
+        cxGetIt.Get<cxIGamePlayerBloc> ().LoadStateAsObservable 
             .Where (state => state == cxTGameDataLoadState.Failed)
             .Subscribe (state => {
 

@@ -56,7 +56,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
 
     private void OnEnable () {
         if (isLocalPlayer) {
-            InitAnimatorObserver ();
+           // InitAnimatorObserver ();
         }
     }
 
@@ -128,103 +128,6 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
             cameraInner = inner;
         }
     }
-    /*
-        private KeyCode lastKeyCode;
-        private float lastKeyInputTime;
-        private bool doubleTapState;
-
-        bool CheckDoubleTap (KeyCode input) {
-
-            if (lastKeyCode != input) {
-                if (Input.GetKeyDown (input)) {
-                    lastKeyCode = input;
-                    lastKeyInputTime = Time.time;
-                    doubleTapState = false;
-                }
-                return false;
-            }
-
-            if (Input.GetKeyDown (input)) {
-                if ((Time.time - lastKeyInputTime) < 0.3f) {
-                    doubleTapState = true;
-                    return true;
-                } else {
-                    lastKeyCode = input;
-                    lastKeyInputTime = Time.time;
-                    doubleTapState = false;
-                    return false;
-                }
-            } else if (Input.GetKey (input)) {
-                return doubleTapState;
-            } else
-                return false;
-        }
-
-        private void HandleUserInput () {
-            Vector2 move = Vector2.zero;
-            Vector2 look = Vector2.zero;
-            bool jump = false;
-            bool run = false;
-
-            if (Input.GetKey (KeyCode.W) || Input.GetKey (KeyCode.UpArrow)) {
-                move.y = 1;
-                // Hold(false);
-                //     run = CheckDoubleTap (KeyCode.W);
-            }
-
-            if (Input.GetKey (KeyCode.S) || Input.GetKey (KeyCode.DownArrow)) {
-                move.y = -1;
-                // Hold(false);
-                //    run = CheckDoubleTap (KeyCode.S);
-            }
-
-            if (Input.GetKey (KeyCode.A) || Input.GetKey (KeyCode.LeftArrow)) {
-                move.x = -1;
-                // Hold(false);
-            }
-            if (Input.GetKey (KeyCode.D) || Input.GetKey (KeyCode.RightArrow)) {
-                move.x = 1;
-                // Hold(false);
-            }
-
-            //Note. 이종옥, 점프 기능 제거 (싱크 이슈)
-            if (Input.GetKeyDown (KeyCode.Space)) {
-                jump = true;
-               // Hold(false);
-            }
-
-            stateInput.MoveInput (move);
-            stateInput.SprintInput (run);
-            stateInput.JumpInput (jump);
-            stateInput.LookInput (look * rotateSpeed);
-        }
-
-        private void HandleMouseInput () {
-            Vector3? clickPoint = null;
-            if (Input.GetMouseButtonDown (0)) {
-                clickPoint = Input.mousePosition;
-            }
-
-            if (clickPoint.HasValue) {
-                var physics = gameObject.scene.GetPhysicsScene ();
-                var ray = Camera.main.ScreenPointToRay (clickPoint.Value);
-                if (!cxUISystemUtil.IsMousePointerOnUI (0)) {
-                    if (physics.Raycast (ray.origin, ray.direction, out RaycastHit hitted, float.MaxValue)) {
-                        int hitLayerMask = 1 << hitted.collider.gameObject.layer;
-
-                        if ((hitLayerMask & movingGroundMask.value) != 0) {
-                            SetMoveToPosition (hitted.point);
-                        } else if (hitLayerMask == 256) {
-                            Debug.Log ("hitted : " + hitted.transform.gameObject.name);
-                            var trigger = hitted.transform.gameObject.GetComponent<cxTrigger> ();
-                            if (trigger)
-                                playerCommand.ExecuteTouchCommand (trigger, hitted.point);
-                        }
-                    }
-                }
-            }
-        }
-    */
 
     public void SetMoveToPosition (Vector3 _point) {
         stateMachine.SendMessage ((int) MsgID.MoveTo, _point, 0);
@@ -232,7 +135,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
 
     public bool CanTrigger (cxTrigger trigger) {
         if (trigger.triggerType == cxTriggerType.SitOn) {
-            return IS_STATE (StateID.Default);
+            return IsState (StateID.Default);
         } else {
             return true;
         }
@@ -251,6 +154,11 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         stateMachine.SendMessage ((int) MsgID.SitOn, trigger, 0);
     }
 
+    private bool IsState (StateID stateID) {
+        return stateMachine.GetCurState () == (int) stateID;
+    }
+
+
     #region State Machine Core
 
     private enum StateID {
@@ -262,6 +170,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         MoveForSitOn,
         MoveTo,
         WarpTo,
+        Jump,
     }
 
     private enum MsgID {
@@ -273,64 +182,10 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         MoveTo,
         ArrivedTo,
         EndOnceMotion,
-        WarpTo
+        WarpTo,
+        Landed
     }
     private StateMachine stateMachine;
-
-    bool IS_STATE (StateID stateID) {
-        return stateMachine.GetCurState () == (int) stateID;
-    }
-
-    void InitAnimatorObserver () {
-
-        var _stateMachineObservables = animator.GetBehaviour<ObservableStateMachineTrigger> ();
-
-        int _animStateStandToSit = Animator.StringToHash ("StandToSit");
-        int _animStateSitting = Animator.StringToHash ("Sitting");
-        int _animStateCrying = Animator.StringToHash ("Crying");
-        int _animStateHandRaising = Animator.StringToHash ("HandRaising");
-        int _animStateIdleWalking = Animator.StringToHash ("Idle Walk Run Blend");
-        int _amimStateJump = Animator.StringToHash ("JumpStart");
-        int _amimStateInAir = Animator.StringToHash ("InAir");
-        int _amimStateJumpLand = Animator.StringToHash ("JumpLand");
-
-        int _animStateAngry = Animator.StringToHash ("Angry");
-        int _animStateHappy = Animator.StringToHash ("Happy");
-        int _animStateFrustration = Animator.StringToHash ("Frustration");
-        int _animStateLaugh = Animator.StringToHash ("Laugh");
-        int _animStateClap = Animator.StringToHash ("Clap");
-        int _animStateGreeting = Animator.StringToHash ("Greeting");
-        int _animStateSupriesed = Animator.StringToHash ("Supriesed");
-
-        disposables.Clear ();
-
-        _stateMachineObservables.OnStateExitAsObservable ()
-            .Where (s => s.StateInfo.shortNameHash == _animStateCrying ||
-                s.StateInfo.shortNameHash == _animStateHandRaising ||
-                s.StateInfo.shortNameHash == _animStateAngry ||
-                s.StateInfo.shortNameHash == _animStateHappy ||
-                s.StateInfo.shortNameHash == _animStateFrustration ||
-                s.StateInfo.shortNameHash == _animStateLaugh ||
-                s.StateInfo.shortNameHash == _animStateClap ||
-                s.StateInfo.shortNameHash == _animStateGreeting ||
-                s.StateInfo.shortNameHash == _animStateSupriesed
-            )
-            .DoOnCompleted (() => {
-                Debug.Log ("OnStateExitAsObservable DoOnCompleted");
-            })
-            .DoOnTerminate (() => {
-                Debug.Log ("OnStateExitAsObservable DoOnTerminate");
-            })
-            .DoOnCancel (() => {
-                Debug.Log ("OnStateExitAsObservable DoOnCancel");
-            })
-            .Subscribe (s => {
-                Debug.Log ("_stateMachineObservables state exit:" + s.StateInfo.shortNameHash);
-                stateMachine.SendMessage ((int) MsgID.EndOnceMotion, s.StateInfo.shortNameHash, 0);
-                isAnimatorPlay = false;
-            })
-            .AddTo (disposables);
-    }
 
     void InitStateMachine () {
 
@@ -375,7 +230,63 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
 
         bool _lookAtState = false;
 
-        InitAnimatorObserver ();
+        void _initAnimatorObserver () {
+
+            var _stateMachineObservables = animator.GetBehaviour<ObservableStateMachineTrigger> ();
+
+            // int _animStateStandToSit = Animator.StringToHash ("StandToSit");
+            // int _animStateSitting = Animator.StringToHash ("Sitting");
+            // int _animStateCrying = Animator.StringToHash ("Crying");
+            // int _animStateHandRaising = Animator.StringToHash ("HandRaising");
+            // int _animStateIdleWalking = Animator.StringToHash ("Idle Walk Run Blend");
+            // int _amimStateJump = Animator.StringToHash ("JumpStart");
+            // int _amimStateInAir = Animator.StringToHash ("InAir");
+            // int _amimStateJumpLand = Animator.StringToHash ("JumpLand");
+
+            // int _animStateAngry = Animator.StringToHash ("Angry");
+            // int _animStateHappy = Animator.StringToHash ("Happy");
+            // int _animStateFrustration = Animator.StringToHash ("Frustration");
+            // int _animStateLaugh = Animator.StringToHash ("Laugh");
+            // int _animStateClap = Animator.StringToHash ("Clap");
+            // int _animStateGreeting = Animator.StringToHash ("Greeting");
+            // int _animStateSupriesed = Animator.StringToHash ("Supriesed");
+            
+           // disposables.Clear ();
+
+            _stateMachineObservables.OnStateExitAsObservable ()
+                .Where (s => s.StateInfo.shortNameHash == _animStateCrying ||
+                    s.StateInfo.shortNameHash == _animStateHandRaising ||
+                    s.StateInfo.shortNameHash == _animStateAngry ||
+                    s.StateInfo.shortNameHash == _animStateHappy ||
+                    s.StateInfo.shortNameHash == _animStateFrustration ||
+                    s.StateInfo.shortNameHash == _animStateLaugh ||
+                    s.StateInfo.shortNameHash == _animStateClap ||
+                    s.StateInfo.shortNameHash == _animStateGreeting ||
+                    s.StateInfo.shortNameHash == _animStateSupriesed
+                )
+                .DoOnCompleted (() => {
+                    Debug.Log ("OnStateExitAsObservable DoOnCompleted");
+                })
+                .DoOnTerminate (() => {
+                    Debug.Log ("OnStateExitAsObservable DoOnTerminate");
+                })
+                .DoOnCancel (() => {
+                    Debug.Log ("OnStateExitAsObservable DoOnCancel");
+                })
+                .Subscribe (s => {
+                    Debug.Log ("_stateMachineObservables state exit:" + s.StateInfo.shortNameHash);
+                    stateMachine.SendMessage ((int) MsgID.EndOnceMotion, s.StateInfo.shortNameHash, 0);
+                    isAnimatorPlay = false;
+                })
+                .AddTo (disposables);
+
+            _stateMachineObservables.OnStateExitAsObservable ()
+                .Where (s => s.StateInfo.shortNameHash == _amimStateJumpLand)
+                .Subscribe (s => {
+                    stateMachine.SendMessage ((int) MsgID.Landed, null, 0);
+                })
+                .AddTo (disposables);
+        }
 
         void _UpdateLookAtState () {
             if (_lookAtState) {
@@ -448,6 +359,9 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
                     _UpdateLookAtState ();
                     _UpdateAnimator ();
 
+                    if (stateOutput.jump)
+                        SET_STATE (StateID.Jump);
+
                 } else if (MSG (MsgID.LookAt)) {
                     _SetLookAtState ((cxTrigger) PARAM ());
                     return true;
@@ -463,6 +377,20 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
                 } else if (MSG (MsgID.WarpTo)) {
                     SET_STATE (StateID.WarpTo, PARAM ());
                     return true;
+                }
+            } else if (STATE (StateID.Jump)) {
+                if (ENTER ()) {
+
+                } else if (EXIT ()) {
+
+                } else if (UPDATE ()) {
+
+                    // if(stateOutput.freeFall && stateOutput.grounded)
+                    //     SET_STATE(StateID.Default);
+
+                    _UpdateAnimator ();
+                } else if (MSG (MsgID.Landed)) {
+                    SET_STATE (StateID.Default);
                 }
             } else if (STATE (StateID.MoveTo)) {
                 if (ENTER ()) {
@@ -485,6 +413,9 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
                     }
 
                     _UpdateAnimator ();
+
+                    if (stateOutput.jump)
+                        SET_STATE (StateID.Jump);
 
                 } else if (MSG (MsgID.ArrivedTo)) {
                     SET_STATE (StateID.Default);
@@ -586,6 +517,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
             return false;
         });
 
+        _initAnimatorObserver ();
         stateMachine.SetState ((int) StateID.Default);
     }
 
