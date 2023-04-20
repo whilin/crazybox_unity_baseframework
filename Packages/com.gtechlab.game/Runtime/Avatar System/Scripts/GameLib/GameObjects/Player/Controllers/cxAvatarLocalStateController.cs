@@ -39,6 +39,8 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         playerCommand = GetComponent<cxAbstractPlayerCommand> ();
         keyInputController = GetComponent<cxAvatarKeyInputController> ();
 
+        animator = GetComponent<Animator> ();
+
         isAnimatorPlay = false;
         isLocalPlayer = false;
         naviAgentMoveController.enabled = false;
@@ -56,7 +58,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
 
     private void OnEnable () {
         if (isLocalPlayer) {
-           // InitAnimatorObserver ();
+            // InitAnimatorObserver ();
         }
     }
 
@@ -67,6 +69,11 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         directMoveController.enabled = true;
 
         InitStateMachine ();
+        InitAnimatorObserver ();
+    }
+
+    public void RebuildAnimator () {
+        InitAnimatorObserver ();
     }
 
     public void Hold (bool hold) {
@@ -158,7 +165,6 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         return stateMachine.GetCurState () == (int) stateID;
     }
 
-
     #region State Machine Core
 
     private enum StateID {
@@ -185,108 +191,113 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         WarpTo,
         Landed
     }
+
     private StateMachine stateMachine;
+
+    readonly int _animStateStandToSit = Animator.StringToHash ("StandToSit");
+    readonly int _animStateSitting = Animator.StringToHash ("Sitting");
+    readonly int _animStateCrying = Animator.StringToHash ("Crying");
+    readonly int _animStateHandRaising = Animator.StringToHash ("HandRaising");
+    readonly int _animStateIdleWalking = Animator.StringToHash ("Idle Walk Run Blend");
+    readonly int _amimStateJump = Animator.StringToHash ("JumpStart");
+    readonly int _amimStateInAir = Animator.StringToHash ("InAir");
+    readonly int _amimStateJumpLand = Animator.StringToHash ("JumpLand");
+
+    readonly int _animStateAngry = Animator.StringToHash ("Angry");
+    readonly int _animStateHappy = Animator.StringToHash ("Happy");
+    readonly int _animStateFrustration = Animator.StringToHash ("Frustration");
+    readonly int _animStateLaugh = Animator.StringToHash ("Laugh");
+    readonly int _animStateClap = Animator.StringToHash ("Clap");
+    readonly int _animStateGreeting = Animator.StringToHash ("Greeting");
+    readonly int _animStateSupriesed = Animator.StringToHash ("Supriesed");
+
+    //Trigger ID
+    readonly int _animIDSpeed = Animator.StringToHash ("Speed");
+    int _animIDGrounded = Animator.StringToHash ("Grounded");
+    int _animIDJump = Animator.StringToHash ("Jump");
+    int _animIDFreeFall = Animator.StringToHash ("FreeFall");
+    int _animIDMotionSpeed = Animator.StringToHash ("MotionSpeed");
+
+    int _animIDSit = Animator.StringToHash ("Sit");
+    int _animIDSitTrigger = Animator.StringToHash ("SitTrigger");
+    int _animIDCrying = Animator.StringToHash ("Crying");
+    int _animIDHandRaising = Animator.StringToHash ("HandRaising");
+
+    int _animIDAngry = Animator.StringToHash ("Angry");
+    int _animIDHappy = Animator.StringToHash ("Happy");
+    int _animIDFrustration = Animator.StringToHash ("Frustration");
+    int _animIDLaugh = Animator.StringToHash ("Laugh");
+    int _animIDClap = Animator.StringToHash ("Clap");
+    int _animIDGreeting = Animator.StringToHash ("Greeting");
+    int _animIDSupriesed = Animator.StringToHash ("Supriesed");
+
+    void InitAnimatorObserver () {
+        disposables.Clear ();
+        //Ad-Hoc,  Awake 타임에서의 ObservableStateMachineTrigger 와,
+        //           다음 프레임의 ObservableStateMachineTrigger 다른다.
+        // 파츠 교체시 Animator.Rebind()의 문제였음
+        // await new WaitForUpdate();
+
+        var _stateMachineObservables = animator.GetBehaviour<ObservableStateMachineTrigger> ();
+
+        // int _animStateStandToSit = Animator.StringToHash ("StandToSit");
+        // int _animStateSitting = Animator.StringToHash ("Sitting");
+        // int _animStateCrying = Animator.StringToHash ("Crying");
+        // int _animStateHandRaising = Animator.StringToHash ("HandRaising");
+        // int _animStateIdleWalking = Animator.StringToHash ("Idle Walk Run Blend");
+        // int _amimStateJump = Animator.StringToHash ("JumpStart");
+        // int _amimStateInAir = Animator.StringToHash ("InAir");
+        // int _amimStateJumpLand = Animator.StringToHash ("JumpLand");
+
+        // int _animStateAngry = Animator.StringToHash ("Angry");
+        // int _animStateHappy = Animator.StringToHash ("Happy");
+        // int _animStateFrustration = Animator.StringToHash ("Frustration");
+        // int _animStateLaugh = Animator.StringToHash ("Laugh");
+        // int _animStateClap = Animator.StringToHash ("Clap");
+        // int _animStateGreeting = Animator.StringToHash ("Greeting");
+        // int _animStateSupriesed = Animator.StringToHash ("Supriesed");
+
+        // disposables.Clear ();
+
+        _stateMachineObservables.OnStateExitAsObservable ()
+            .Where (s => s.StateInfo.shortNameHash == _animStateCrying ||
+                s.StateInfo.shortNameHash == _animStateHandRaising ||
+                s.StateInfo.shortNameHash == _animStateAngry ||
+                s.StateInfo.shortNameHash == _animStateHappy ||
+                s.StateInfo.shortNameHash == _animStateFrustration ||
+                s.StateInfo.shortNameHash == _animStateLaugh ||
+                s.StateInfo.shortNameHash == _animStateClap ||
+                s.StateInfo.shortNameHash == _animStateGreeting ||
+                s.StateInfo.shortNameHash == _animStateSupriesed
+            )
+            .DoOnCompleted (() => {
+                Debug.Log ("OnStateExitAsObservable DoOnCompleted");
+            })
+            .DoOnTerminate (() => {
+                Debug.Log ("OnStateExitAsObservable DoOnTerminate");
+            })
+            .DoOnCancel (() => {
+                Debug.Log ("OnStateExitAsObservable DoOnCancel");
+            })
+            .Subscribe (s => {
+                Debug.Log ("_stateMachineObservables state exit:" + s.StateInfo.shortNameHash);
+                stateMachine.SendMessage ((int) MsgID.EndOnceMotion, s.StateInfo.shortNameHash, 0);
+                isAnimatorPlay = false;
+            })
+            .AddTo (disposables);
+
+        _stateMachineObservables.OnStateExitAsObservable ()
+            .Where (s => s.StateInfo.shortNameHash == _amimStateJumpLand)
+            .Subscribe (s => {
+                stateMachine.SendMessage ((int) MsgID.Landed, null, 0);
+            })
+            .AddTo (disposables);
+    }
 
     void InitStateMachine () {
 
         //  var _stateMachineObservables = animator.GetBehaviour<ObservableStateMachineTrigger> ();
-
-        int _animStateStandToSit = Animator.StringToHash ("StandToSit");
-        int _animStateSitting = Animator.StringToHash ("Sitting");
-        int _animStateCrying = Animator.StringToHash ("Crying");
-        int _animStateHandRaising = Animator.StringToHash ("HandRaising");
-        int _animStateIdleWalking = Animator.StringToHash ("Idle Walk Run Blend");
-        int _amimStateJump = Animator.StringToHash ("JumpStart");
-        int _amimStateInAir = Animator.StringToHash ("InAir");
-        int _amimStateJumpLand = Animator.StringToHash ("JumpLand");
-
-        int _animStateAngry = Animator.StringToHash ("Angry");
-        int _animStateHappy = Animator.StringToHash ("Happy");
-        int _animStateFrustration = Animator.StringToHash ("Frustration");
-        int _animStateLaugh = Animator.StringToHash ("Laugh");
-        int _animStateClap = Animator.StringToHash ("Clap");
-        int _animStateGreeting = Animator.StringToHash ("Greeting");
-        int _animStateSupriesed = Animator.StringToHash ("Supriesed");
-
-        //Trigger ID
-        int _animIDSpeed = Animator.StringToHash ("Speed");
-        int _animIDGrounded = Animator.StringToHash ("Grounded");
-        int _animIDJump = Animator.StringToHash ("Jump");
-        int _animIDFreeFall = Animator.StringToHash ("FreeFall");
-        int _animIDMotionSpeed = Animator.StringToHash ("MotionSpeed");
-
-        int _animIDSit = Animator.StringToHash ("Sit");
-        int _animIDSitTrigger = Animator.StringToHash ("SitTrigger");
-        int _animIDCrying = Animator.StringToHash ("Crying");
-        int _animIDHandRaising = Animator.StringToHash ("HandRaising");
-
-        int _animIDAngry = Animator.StringToHash ("Angry");
-        int _animIDHappy = Animator.StringToHash ("Happy");
-        int _animIDFrustration = Animator.StringToHash ("Frustration");
-        int _animIDLaugh = Animator.StringToHash ("Laugh");
-        int _animIDClap = Animator.StringToHash ("Clap");
-        int _animIDGreeting = Animator.StringToHash ("Greeting");
-        int _animIDSupriesed = Animator.StringToHash ("Supriesed");
-
         bool _lookAtState = false;
-
-        void _initAnimatorObserver () {
-
-            var _stateMachineObservables = animator.GetBehaviour<ObservableStateMachineTrigger> ();
-
-            // int _animStateStandToSit = Animator.StringToHash ("StandToSit");
-            // int _animStateSitting = Animator.StringToHash ("Sitting");
-            // int _animStateCrying = Animator.StringToHash ("Crying");
-            // int _animStateHandRaising = Animator.StringToHash ("HandRaising");
-            // int _animStateIdleWalking = Animator.StringToHash ("Idle Walk Run Blend");
-            // int _amimStateJump = Animator.StringToHash ("JumpStart");
-            // int _amimStateInAir = Animator.StringToHash ("InAir");
-            // int _amimStateJumpLand = Animator.StringToHash ("JumpLand");
-
-            // int _animStateAngry = Animator.StringToHash ("Angry");
-            // int _animStateHappy = Animator.StringToHash ("Happy");
-            // int _animStateFrustration = Animator.StringToHash ("Frustration");
-            // int _animStateLaugh = Animator.StringToHash ("Laugh");
-            // int _animStateClap = Animator.StringToHash ("Clap");
-            // int _animStateGreeting = Animator.StringToHash ("Greeting");
-            // int _animStateSupriesed = Animator.StringToHash ("Supriesed");
-            
-           // disposables.Clear ();
-
-            _stateMachineObservables.OnStateExitAsObservable ()
-                .Where (s => s.StateInfo.shortNameHash == _animStateCrying ||
-                    s.StateInfo.shortNameHash == _animStateHandRaising ||
-                    s.StateInfo.shortNameHash == _animStateAngry ||
-                    s.StateInfo.shortNameHash == _animStateHappy ||
-                    s.StateInfo.shortNameHash == _animStateFrustration ||
-                    s.StateInfo.shortNameHash == _animStateLaugh ||
-                    s.StateInfo.shortNameHash == _animStateClap ||
-                    s.StateInfo.shortNameHash == _animStateGreeting ||
-                    s.StateInfo.shortNameHash == _animStateSupriesed
-                )
-                .DoOnCompleted (() => {
-                    Debug.Log ("OnStateExitAsObservable DoOnCompleted");
-                })
-                .DoOnTerminate (() => {
-                    Debug.Log ("OnStateExitAsObservable DoOnTerminate");
-                })
-                .DoOnCancel (() => {
-                    Debug.Log ("OnStateExitAsObservable DoOnCancel");
-                })
-                .Subscribe (s => {
-                    Debug.Log ("_stateMachineObservables state exit:" + s.StateInfo.shortNameHash);
-                    stateMachine.SendMessage ((int) MsgID.EndOnceMotion, s.StateInfo.shortNameHash, 0);
-                    isAnimatorPlay = false;
-                })
-                .AddTo (disposables);
-
-            _stateMachineObservables.OnStateExitAsObservable ()
-                .Where (s => s.StateInfo.shortNameHash == _amimStateJumpLand)
-                .Subscribe (s => {
-                    stateMachine.SendMessage ((int) MsgID.Landed, null, 0);
-                })
-                .AddTo (disposables);
-        }
 
         void _UpdateLookAtState () {
             if (_lookAtState) {
@@ -517,7 +528,6 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
             return false;
         });
 
-        _initAnimatorObserver ();
         stateMachine.SetState ((int) StateID.Default);
     }
 

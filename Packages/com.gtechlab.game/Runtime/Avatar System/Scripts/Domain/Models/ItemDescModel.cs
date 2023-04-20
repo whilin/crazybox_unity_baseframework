@@ -2,6 +2,8 @@ public enum ItemType {
     Undef,
     Gold = 1,
     Gear = 2,
+
+    QuestItem = 10,
 }
 
 public enum ItemFlag {

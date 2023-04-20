@@ -62,4 +62,15 @@ public class TAvatarEquipSetModel {
                 return 0;
         }
     }
+
+    public TAvatarEquipSetModel Clone () {
+        return new TAvatarEquipSetModel () {
+            hairItemCode = hairItemCode,
+                faceItemCode = faceItemCode,
+                faceAccessoryItemCode = faceAccessoryItemCode,
+                wearItemCode = wearItemCode,
+                shoesItemCode = shoesItemCode,
+                bodyItemCode = bodyItemCode
+        };
+    }
 }

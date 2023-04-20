@@ -19,11 +19,11 @@ public abstract class cxAbstractPlayerObject : MonoBehaviour {
 
     public static event Action<cxAbstractPlayerObject, string> OnMessage;
 
-    protected void Awake() {
+    protected virtual void Awake() {
         localPlayerController = GetComponent<cxAvatarLocalStateController>();
     }
 
-    protected void Start () {
+    protected virtual void Start () {
         // if (isSandbox) {
         //     localPlayerController.StartLocalPlayer ();
         // }
@@ -45,7 +45,7 @@ public abstract class cxAbstractPlayerObject : MonoBehaviour {
     }
 
     private void SetupAvatar () {
-        cxAvatarMeshAssembly.AssemblyAvatar (gameObject, avatarProfile.equipSet);
+        cxAvatarMeshAssembly.Instance.AssemblyAvatar (gameObject, avatarProfile.equipSet);
     }
 
     private void SetupLocalPlayerController () {

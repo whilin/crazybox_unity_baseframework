@@ -2,8 +2,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public static class cxAvatarMeshAssembly {
+public class cxAvatarMeshAssembly  : cxSingleton<cxAvatarMeshAssembly> {
 
+    cxIGameItemRepository gameItemRepository;
+
+    public void Create(cxIGameItemRepository _repo){
+        gameItemRepository = _repo;
+    }
+
+/*
     static async Task<GameObject> FindAvatarItem (int itemCode, int defaultItemCode) {
 
         var itemDesc = cxGetIt.Get<cxIGameItemBloc> ().FindAvatarItemDesc (itemCode != 0 ? itemCode : defaultItemCode);
@@ -14,8 +21,19 @@ public static class cxAvatarMeshAssembly {
 
         return null;
     }
+*/
+        async Task<GameObject> FindAvatarItem (int itemCode, int defaultItemCode) {
 
-    public static async void AssemblyAvatar (GameObject avatarGameObject, TAvatarEquipSetModel equipSet, int layer = 6) {
+        var itemDesc = gameItemRepository.FindAvatarItemDesc (itemCode != 0 ? itemCode : defaultItemCode);
+        if (itemDesc != null) {
+            var prefabs = await gameItemRepository.LoadAvatarMeshPrefab (itemDesc);
+            return prefabs;
+        }
+
+        return null;
+    }
+
+    public async void AssemblyAvatar (GameObject avatarGameObject, TAvatarEquipSetModel equipSet, int layer = 6) {
 
         TAvatarItemDescModel[] items = new TAvatarItemDescModel[6];
         GameObject[] prefabs = new GameObject[6];
@@ -44,16 +62,20 @@ public static class cxAvatarMeshAssembly {
                 AssemblyAvatar (avatarGameObject, prefabs[i], layer);
         }
 
-        avatarGameObject.GetComponent<Animator> ()?.Rebind ();
+        avatarGameObject.GetComponent<Animator> ()?.Rebind();
+       // avatarGameObject.SendMessage("OnAnimatorRebind", SendMessageOptions.DontRequireReceiver)
+
 #if UNITY_EDITOR
-        foreach (Transform t in avatarGameObject.GetComponentsInChildren<Transform> ()) {
-            if (t.gameObject.GetComponent<Renderer> () != null) {
-                Material[] myMaterials = t.gameObject.GetComponent<Renderer> ().materials;
-                foreach (Material material in myMaterials) {
-                    material.shader = Shader.Find (material.shader.name);
-                }
-            }
-        }
+        cxAssetBundleUtil.FixShadersForEditor(avatarGameObject);
+
+        // foreach (Transform t in avatarGameObject.GetComponentsInChildren<Transform> ()) {
+        //     if (t.gameObject.GetComponent<Renderer> () != null) {
+        //         Material[] myMaterials = t.gameObject.GetComponent<Renderer> ().materials;
+        //         foreach (Material material in myMaterials) {
+        //             material.shader = Shader.Find (material.shader.name);
+        //         }
+        //     }
+        // }
 #endif
     }
 
@@ -62,15 +84,19 @@ public static class cxAvatarMeshAssembly {
             AssemblyAvatar (avatarGameObject, prefab, layer);
 
         avatarGameObject.GetComponent<Animator> ()?.Rebind ();
+        //avatarGameObject.SendMessage("OnAnimatorRebind", SendMessageOptions.DontRequireReceiver)
+
 #if UNITY_EDITOR
-        foreach (Transform t in avatarGameObject.GetComponentsInChildren<Transform> ()) {
-            if (t.gameObject.GetComponent<Renderer> () != null) {
-                Material[] myMaterials = t.gameObject.GetComponent<Renderer> ().materials;
-                foreach (Material material in myMaterials) {
-                    material.shader = Shader.Find (material.shader.name);
-                }
-            }
-        }
+        cxAssetBundleUtil.FixShadersForEditor(avatarGameObject);
+
+        // foreach (Transform t in avatarGameObject.GetComponentsInChildren<Transform> ()) {
+        //     if (t.gameObject.GetComponent<Renderer> () != null) {
+        //         Material[] myMaterials = t.gameObject.GetComponent<Renderer> ().materials;
+        //         foreach (Material material in myMaterials) {
+        //             material.shader = Shader.Find (material.shader.name);
+        //         }
+        //     }
+        // }
 #endif
     }
 
@@ -94,7 +120,7 @@ public static class cxAvatarMeshAssembly {
         else
             GameObject.Destroy (skinedMeshObj);
 
-        gameObject.GetComponent<Animator> ()?.Rebind ();
+        //gameObject.GetComponent<Animator> ()?.Rebind ();
     }
 
     private static void To_CharacterBoneDataSetting (GameObject gameObject, SkinnedMeshRenderer thisRenderer, int layer) {

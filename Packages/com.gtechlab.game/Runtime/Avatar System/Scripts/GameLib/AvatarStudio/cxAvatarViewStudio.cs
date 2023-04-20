@@ -89,7 +89,7 @@ public class cxAvatarViewStudio : MonoSingleton<cxAvatarViewStudio> {
 
         int layer = LayerMask.NameToLayer ("AvatarView");
 
-        cxAvatarMeshAssembly.AssemblyAvatar (avatarObject, equipSet, layer);
+        cxAvatarMeshAssembly.Instance.AssemblyAvatar (avatarObject, equipSet, layer);
     }
 
     private Vector3? prevPostion;
