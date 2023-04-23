@@ -15,7 +15,7 @@ public class cxUniversalResourceLoader : cxSingleton<cxUniversalResourceLoader> 
             var bundleData = cxOnDemandBundleLoader.Instance.LoadBundle (bundleName);
             return (!(bundleData.IsCached () || bundleData.IsReady), (int) bundleData.size);
         } else if (cxResourceNaming.IsResource (url, out string resourceId, out path)) {
-            var bundleData = await cxResourceBundleLoader.Instance.LoadBundle (bundleName);
+            var bundleData = await cxResourceBundleLoader.Instance.LoadBundle (resourceId);
             return (!(bundleData.IsCached () || bundleData.IsReady), (int) bundleData.resourceDesc.bundleSize);
         } else if (cxResourceNaming.IsHttp (url)) {
             return (!cxCachedWebContentLoader.Instance.HasCache (url), 0);

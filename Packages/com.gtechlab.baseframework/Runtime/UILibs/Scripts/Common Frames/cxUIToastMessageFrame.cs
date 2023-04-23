@@ -42,11 +42,21 @@ public class cxUIToastMessageFrame : cxUIFrame
         
     }
 
-    public void Toast(string message, MsgType msgType = MsgType.Normal ){
+    public void ShowToast(string message, MsgType msgType = MsgType.Normal ){
         this.message.text = message;
         this.background.color = msgType == MsgType.Normal ? normalMessageBg : warningMessageBg;
         panel.Play();
         panel.ScheduledHide(hideTime);
+    }
+
+    public static void Toast(string message, MsgType msgType = MsgType.Normal ){
+        var toastFrame = cxUINavigator.Instance.FindFrame<cxUIToastMessageFrame>();
+        if(toastFrame ==null) {
+            Debug.LogWarning("cxUIToastMessageFrame Toast, Active Frame Not Found");
+            return;
+        }
+
+        toastFrame.ShowToast(message, msgType);
     }
 
 }

@@ -15,15 +15,20 @@ public class cxAvatarViewStudio : MonoSingleton<cxAvatarViewStudio> {
     [SerializeField]
     private int renderTextureSize = 1024;
 
+    [SerializeField]
+    public LayerMask viewLayer;
 
     RenderTexture renderTexture;
     GameObject avatarObject;
+    GameObject setupPrefab;
 
     override protected void Awake () {
         base.Awake ();
 
         avatarViewCamera.gameObject.SetActive (false);
         viewLight.gameObject.SetActive (false);
+        avatarViewCamera.cullingMask = viewLayer;
+        viewLight.cullingMask = viewLayer;
     }
 
     override protected void OnDestroy () {
@@ -37,57 +42,78 @@ public class cxAvatarViewStudio : MonoSingleton<cxAvatarViewStudio> {
         base.OnDestroy ();
     }
 
+
+    public RenderTexture StartStudio (GameObject setupPrefab, TAvatarEquipSetModel equipSet=null) {
+        if (renderTexture == null)
+            CreateRenderTexture ();
+        
+        if (avatarObject != null)
+            Destroy (avatarObject);
+
+        this.setupPrefab = setupPrefab;
+        avatarViewCamera.gameObject.SetActive (true);
+        viewLight.gameObject.SetActive (isLight);
+
+        avatarObject = GameObject.Instantiate (setupPrefab, standingPivot.position, standingPivot.rotation);
+        avatarObject.transform.SetParent (standingPivot, true);
+        int layer = ToLayerNumber (viewLayer);
+
+        if(equipSet!=null)
+          SetAvatar (equipSet, true);
+
+        return renderTexture;
+    }
+
+    public void ChangeEquipSet(TAvatarEquipSetModel equipSet){
+         SetAvatar (equipSet, true);
+    }
+
+    public RenderTexture GetRenderingTexture(){
+        return renderTexture;
+    }
+
+    public void StopStudio () {
+        isRotation = false;
+        avatarViewCamera.gameObject.SetActive (false);
+        viewLight.gameObject.SetActive (false);
+        setupPrefab = null;
+
+        if (avatarObject != null)
+            Destroy (avatarObject);
+    }
+
     void CreateRenderTexture () {
         renderTexture = new RenderTexture (renderTextureSize, renderTextureSize, 16, RenderTextureFormat.ARGB32);
         renderTexture.Create ();
         avatarViewCamera.targetTexture = renderTexture;
     }
 
-    // public RenderTexture StartRendering (int avatarType) {
-    //     if (renderTexture == null)
-    //         CreateRenderTexture ();
+    public static int ToLayerNumber(LayerMask mask) {
+        int layerNumber = 0;
+        int layer = mask.value;
+        while(layer > 1) {
+            layer = layer >> 1;
+            layerNumber++;
+        }
 
-    //     SetaAvatar (avatarType);
-
-    //     avatarViewCamera.gameObject.SetActive (true);
-    //     viewLight.gameObject.SetActive (isLight);
-
-    //     return renderTexture;
-    // }
-
-    public RenderTexture StartRendering (TAvatarEquipSetModel equipSet) {
-        if (renderTexture == null)
-            CreateRenderTexture ();
-
-        SetAvatar (equipSet);
-
-        avatarViewCamera.gameObject.SetActive (true);
-        viewLight.gameObject.SetActive (isLight);
-
-        return renderTexture;
+        return layerNumber;
     }
 
-    public void StopRendering () {
-        isRotation = false;
-        avatarViewCamera.gameObject.SetActive (false);
-        viewLight.gameObject.SetActive (false);
+     void SetAvatar (TAvatarEquipSetModel equipSet, bool reset) {
+        // if (avatarObject != null)
+        //     Destroy (avatarObject);
 
-        if (avatarObject != null)
-            Destroy (avatarObject);
-    }
+        // GameObject prefabAvartViewerObject =  await cxGetIt.Get<cxIGameItemBloc>().LoadAvatarViewerSetupPrefab();
 
-     async void SetAvatar (TAvatarEquipSetModel equipSet) {
-        if (avatarObject != null)
-            Destroy (avatarObject);
+        // await new WaitForUpdate();
 
-        GameObject prefabAvartViewerObject =  await  cxGetIt.Get<cxIGameItemBloc>().LoadAvatarViewerSetupPrefab();
+        // avatarObject = GameObject.Instantiate (prefabAvartViewerObject, standingPivot.position, standingPivot.rotation);
+        // avatarObject.transform.SetParent (standingPivot, true);
 
-        await new WaitForUpdate();
+        int layer = ToLayerNumber (viewLayer);// LayerMask.NameToLayer ("AvatarView");
 
-        avatarObject = GameObject.Instantiate (prefabAvartViewerObject, standingPivot.position, standingPivot.rotation);
-        avatarObject.transform.SetParent (standingPivot, true);
-
-        int layer = LayerMask.NameToLayer ("AvatarView");
+        if(reset)
+            cxAvatarMeshAssembly.ClearSkinnedMeshs(avatarObject);
 
         cxAvatarMeshAssembly.Instance.AssemblyAvatar (avatarObject, equipSet, layer);
     }

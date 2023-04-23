@@ -13,3 +13,11 @@ public class TAvatarProfileModel
     public TAvatarEquipSetModel equipSet;
     public int gender;
 }
+
+[Serializable]
+public class TUserInvenItemModel {
+    public ItemType itemType;
+    public int itemCode;
+    public int invenCode;
+    public int quantity;
+}

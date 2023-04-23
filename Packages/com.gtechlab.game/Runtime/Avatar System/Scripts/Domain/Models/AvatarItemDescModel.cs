@@ -8,6 +8,10 @@ public enum GearItemType {
 
     Hair = 10,
     FaceAccessory = 11,
+    Hat = 12,
+    Backpack = 13,
+
+    MAX_SLOT_SIZE = 14
 }
 
 public class TAvatarItemDescModel : TBaseItemDescModel {

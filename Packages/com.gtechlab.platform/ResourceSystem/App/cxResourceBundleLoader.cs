@@ -84,7 +84,7 @@ public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
     private string resourceLocation;
     private string platformName;
 
-    public static void Create (cxIResourceInfoRepository resourceInfoRepository, string resourceLocation) {
+    public static void Initialize (cxIResourceInfoRepository resourceInfoRepository, string resourceLocation) {
         cxResourceBundleLoader.Instance.resourceInfoRepository = resourceInfoRepository;
         cxResourceBundleLoader.Instance.resourceLocation = resourceLocation;
         cxResourceBundleLoader.Instance.platformName = cxResourceNaming.GetActivePlatformName ();

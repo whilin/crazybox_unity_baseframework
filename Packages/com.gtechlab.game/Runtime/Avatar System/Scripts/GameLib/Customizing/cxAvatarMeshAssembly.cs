@@ -1,81 +1,87 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class cxAvatarMeshAssembly  : cxSingleton<cxAvatarMeshAssembly> {
+public interface cxIAvatarEquipSetMeshBuilder {
+    Task<List<GameObject>> BuildEquipSetMeshs (TAvatarEquipSetModel equipSet);
+}
 
-    cxIGameItemRepository gameItemRepository;
 
-    public void Create(cxIGameItemRepository _repo){
-        gameItemRepository = _repo;
+public class cxDefaultAvatarEquipSetMeshBuilder : cxIAvatarEquipSetMeshBuilder {
+
+    private TAvatarEquipSetModel defaultSet;
+    private string meshPath;
+
+    public cxDefaultAvatarEquipSetMeshBuilder(){
+        defaultSet = cxDefaultAvatarConfig.GetAvatarConfig().defaultEquipSet;
+        meshPath = cxDefaultAvatarConfig.GetAvatarConfig().avatarMeshBasePath;
     }
+    
+    public async Task<List<GameObject>> BuildEquipSetMeshs(TAvatarEquipSetModel equipSet){
 
-/*
-    static async Task<GameObject> FindAvatarItem (int itemCode, int defaultItemCode) {
+        int maxSlot = (int) GearItemType.MAX_SLOT_SIZE;
+        List<GameObject> prefabs = new List<GameObject>();
 
-        var itemDesc = cxGetIt.Get<cxIGameItemBloc> ().FindAvatarItemDesc (itemCode != 0 ? itemCode : defaultItemCode);
-        if (itemDesc != null) {
-            var prefabs = await cxGetIt.Get<cxIGameItemBloc> ().LoadAvatarMeshPrefab (itemDesc);
-            return prefabs;
+        for(int i=0; i < maxSlot ; i++){
+            int itemCode = equipSet[i] != 0 ? equipSet[i] :
+                            defaultSet !=null ? defaultSet[i] : 0;
+           
+            if(itemCode !=0){
+                var desc = cxGetIt.Get<cxIGameItemBloc>().FindAvatarItemDesc(itemCode);
+                var url = Path.Combine (meshPath, desc.resourceURL);
+                var obj = await cxUniversalResourceLoader.Instance.LoadAsset<GameObject> (url);
+                if(obj !=null)
+                    prefabs.Add(obj);
+            }
         }
 
-        return null;
+        return prefabs;
     }
-*/
-        async Task<GameObject> FindAvatarItem (int itemCode, int defaultItemCode) {
+}
 
-        var itemDesc = gameItemRepository.FindAvatarItemDesc (itemCode != 0 ? itemCode : defaultItemCode);
-        if (itemDesc != null) {
-            var prefabs = await gameItemRepository.LoadAvatarMeshPrefab (itemDesc);
-            return prefabs;
-        }
+public class cxAvatarMeshAssembly : cxSingleton<cxAvatarMeshAssembly> {
 
-        return null;
+    cxIAvatarEquipSetMeshBuilder equipSetBuilder;
+
+    public void SetEquipSetBuilder (cxIAvatarEquipSetMeshBuilder _loader) {
+        equipSetBuilder = _loader;
     }
 
     public async void AssemblyAvatar (GameObject avatarGameObject, TAvatarEquipSetModel equipSet, int layer = 6) {
 
-        TAvatarItemDescModel[] items = new TAvatarItemDescModel[6];
-        GameObject[] prefabs = new GameObject[6];
+        if (equipSetBuilder == null)
+            throw new System.Exception ("AssemblyAvatar with EquipItemSetModel needs cxIAvatarEquipSetMeshBuilder Instance");
 
+        var prefabs = await equipSetBuilder.BuildEquipSetMeshs (equipSet);
+        for (int i = 0; i < prefabs.Count; i++) {
+            AssemblyAvatar (avatarGameObject, prefabs[i], layer);
+        }
+
+        avatarGameObject.GetComponent<Animator> ()?.Rebind ();
+
+#if UNITY_EDITOR
+        cxAssetBundleUtil.FixShadersForEditor (avatarGameObject);
+#endif
+    }
+
+    public async void AssemblyAvatar (GameObject avatarGameObject, List<string> equipSetPrefabURLs, int layer = 6) {
+
+        GameObject[] prefabs = new GameObject[equipSetPrefabURLs.Count];
         var config = cxDefaultAvatarConfig.GetAvatarConfig ();
-
-        prefabs[0] = await FindAvatarItem (equipSet.hairItemCode, config.defaultEquipSet.hairItemCode);
-        prefabs[1] = await FindAvatarItem (equipSet.faceAccessoryItemCode, config.defaultEquipSet.faceAccessoryItemCode);
-        prefabs[2] = await FindAvatarItem (equipSet.wearItemCode, config.defaultEquipSet.wearItemCode);
-        prefabs[3] = await FindAvatarItem (equipSet.faceItemCode, config.defaultEquipSet.faceItemCode);
-        prefabs[4] = await FindAvatarItem (equipSet.shoesItemCode, config.defaultEquipSet.shoesItemCode);
-        prefabs[5] = await FindAvatarItem (equipSet.bodyItemCode, config.defaultEquipSet.bodyItemCode);
-
-        // prefabs[1] = cxGetIt.Get<cxIGameItemBloc> ().FindAvatarItemDesc (equipSet.faceItemCode);
-        // prefabs[2] = cxGetIt.Get<cxIGameItemBloc> ().FindAvatarItemDesc (equipSet.faceAccessoryItemCode);
-        // prefabs[3] = cxGetIt.Get<cxIGameItemBloc> ().FindAvatarItemDesc (equipSet.wearItemCode);
-        // prefabs[4] = cxGetIt.Get<cxIGameItemBloc> ().FindAvatarItemDesc (equipSet.shoesItemCode);
-        // prefabs[5] = cxGetIt.Get<cxIGameItemBloc> ().FindAvatarItemDesc (equipSet.bodyItemCode);
-        // for (int i = 0; i < items.Length; i++) {
-        //     if (items[i] != null) 
-        //         prefabs[i] = await cxGetIt.Get<cxIGameItemBloc> ().LoadAvatarMeshPrefab (items[i]);
-        // }
+        foreach (var prefabName in equipSetPrefabURLs) {
+            prefabs[0] = await cxUniversalResourceLoader.Instance.LoadAsset<GameObject> (prefabName);
+        }
 
         for (int i = 0; i < prefabs.Length; i++) {
             if (prefabs[i])
                 AssemblyAvatar (avatarGameObject, prefabs[i], layer);
         }
 
-        avatarGameObject.GetComponent<Animator> ()?.Rebind();
-       // avatarGameObject.SendMessage("OnAnimatorRebind", SendMessageOptions.DontRequireReceiver)
+        avatarGameObject.GetComponent<Animator> ()?.Rebind ();
 
 #if UNITY_EDITOR
-        cxAssetBundleUtil.FixShadersForEditor(avatarGameObject);
-
-        // foreach (Transform t in avatarGameObject.GetComponentsInChildren<Transform> ()) {
-        //     if (t.gameObject.GetComponent<Renderer> () != null) {
-        //         Material[] myMaterials = t.gameObject.GetComponent<Renderer> ().materials;
-        //         foreach (Material material in myMaterials) {
-        //             material.shader = Shader.Find (material.shader.name);
-        //         }
-        //     }
-        // }
+        cxAssetBundleUtil.FixShadersForEditor (avatarGameObject);
 #endif
     }
 
@@ -87,7 +93,7 @@ public class cxAvatarMeshAssembly  : cxSingleton<cxAvatarMeshAssembly> {
         //avatarGameObject.SendMessage("OnAnimatorRebind", SendMessageOptions.DontRequireReceiver)
 
 #if UNITY_EDITOR
-        cxAssetBundleUtil.FixShadersForEditor(avatarGameObject);
+        cxAssetBundleUtil.FixShadersForEditor (avatarGameObject);
 
         // foreach (Transform t in avatarGameObject.GetComponentsInChildren<Transform> ()) {
         //     if (t.gameObject.GetComponent<Renderer> () != null) {
