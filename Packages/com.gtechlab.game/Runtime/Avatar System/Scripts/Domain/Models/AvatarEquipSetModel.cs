@@ -55,6 +55,7 @@ public class TAvatarEquipSetModel {
                 break;
         }
     }
+
     public void Equip (TAvatarEquipSetModel set) {
         bodyItemCode = set.bodyItemCode;
         faceItemCode = set.faceItemCode;
@@ -105,5 +106,21 @@ public class TAvatarEquipSetModel {
                 hatItemCode = hatItemCode,
                 backpackItemCode = backpackItemCode
         };
+    }
+
+
+    public void Set (TAvatarEquipSetModel set) {
+        equipSetId = set.equipSetId;
+        
+        bodyItemCode = set.bodyItemCode;
+        faceItemCode = set.faceItemCode;
+        wearItemCode = set.wearItemCode;
+        pantsItemCode = set.pantsItemCode;
+        shoesItemCode = set.shoesItemCode;
+
+        hairItemCode = set.hairItemCode;
+        faceAccessoryItemCode = set.faceAccessoryItemCode;
+        hatItemCode = set.hatItemCode;
+        backpackItemCode = set.backpackItemCode;
     }
 }

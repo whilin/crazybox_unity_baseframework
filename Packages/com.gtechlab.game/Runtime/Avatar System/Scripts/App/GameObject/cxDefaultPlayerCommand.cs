@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/*
 public class cxDefaultPlayerCommand : cxAbstractPlayerCommand {
     public override void ExecuteSpawn (cxAbstractPlayerObject playerController) {
         var camera = cxAbstractSceneController.Instance.GetPlayerCamera ();
@@ -30,3 +30,4 @@ public class cxDefaultPlayerCommand : cxAbstractPlayerCommand {
         //                     new TriggerTouchCommand (trigger, touchPoint).Execute ();
     }
 }
+*/

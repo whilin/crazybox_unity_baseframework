@@ -18,16 +18,13 @@ public class cxAvatarStateInput {
     public Quaternion sitRotation;
     public bool stand;
 
-    // public bool moveTo;
-    // public Vector3 moveToPos;
+    public Vector3? clickGround;
+    public Vector3 clickPoint;
+    public cxTrigger clickTrigger;
 
     public void MoveInput (Vector2 newMoveDirection) {
         move = newMoveDirection;
     }
-    // public void MoveToInput (Vector2 moveToPos) {
-    //     moveTo = true;
-    //     this.moveToPos = moveToPos;
-    // }
 
     public void LookInput (Vector2 newLookDirection) {
         look = newLookDirection;
@@ -51,17 +48,19 @@ public class cxAvatarStateInput {
         sitRotation = rot;
     }
 
-    public void Consumed () {
+    public void ConsumedActionInput () {
         sit = false;
         crying = false;
         handRaising = false;
         stand = false;
         move = Vector2.zero;
         jump = false;
+        clickGround = null;
+        clickTrigger = null;
         //moveTo = false;
     }
 
-    public void Consumed2 () {
+    public void ConsumedLookInput () {
         look = Vector2.zero;
     }
 }

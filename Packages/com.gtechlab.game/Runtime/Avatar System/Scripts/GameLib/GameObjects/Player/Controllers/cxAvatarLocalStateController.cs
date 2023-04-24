@@ -21,14 +21,13 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
     SkinnedMeshRenderer[] myMeshes;
 
     public cxAvatarStateOutput stateOutput { get; private set; } = new cxAvatarStateOutput ();
-    //public cxAvatarStateInput stateInput { get; private set; } = new cxAvatarStateInput ();
+    public cxAvatarStateInput stateInput { get; private set; } = new cxAvatarStateInput ();
 
     private cxAvatarNaviAgentMoveController naviAgentMoveController;
     private cxAvatarDirectMoveController directMoveController;
+    private cxAbstractAvatarInputController keyInputController;
     private cxAbstractPlayerObject playerObject;
-    private cxAvatarKeyInputController keyInputController;
 
-    private cxAbstractPlayerCommand playerCommand;
 
     CompositeDisposable disposables = new CompositeDisposable ();
 
@@ -36,8 +35,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         naviAgentMoveController = GetComponent<cxAvatarNaviAgentMoveController> ();
         directMoveController = GetComponent<cxAvatarDirectMoveController> ();
         playerObject = GetComponent<cxAbstractPlayerObject> ();
-        playerCommand = GetComponent<cxAbstractPlayerCommand> ();
-        keyInputController = GetComponent<cxAvatarKeyInputController> ();
+        keyInputController = GetComponent<cxAbstractAvatarInputController> ();
 
         animator = GetComponent<Animator> ();
 
@@ -94,7 +92,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
                 if (trigger.triggerType == cxTriggerType.Warp) {
                     stateMachine.SendMessage ((int) MsgID.WarpTo, trigger.warpPoint, 0);
                 } else {
-                    playerCommand.ExecuteTouchCommand (trigger);
+                    playerObject.ExecuteTouchCommand (trigger);
                 }
             }
         }
@@ -149,7 +147,6 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
     }
 
     public void PlayEmotion (EmotionCode emoId) {
-
         stateMachine.SendMessage ((int) MsgID.PlayEmotion, emoId, 0);
     }
 
@@ -301,7 +298,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
 
         void _UpdateLookAtState () {
             if (_lookAtState) {
-                if (keyInputController.stateInput.hasMoveInput ()) {
+                if (stateInput.hasMoveInput ()) {
                     _ReleaseLookAtState ();
                 }
             }
@@ -313,7 +310,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
             //TODO 컨셉 정리 필요
             // Camera lookAtCamera = trigger.lookAtCamera;
             // cameraController.LookAt (lookAtCamera);
-            playerCommand.ExecuteLookAt (playerObject, trigger);
+            playerObject.ExecuteLookAt (playerObject, trigger);
         }
 
         void _ReleaseLookAtState () {
@@ -321,17 +318,20 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
 
             //TODO 컨셉 정리 필요
             //cameraController.Follow (transform);
-            playerCommand.ExecuteLookAtReleased (playerObject);
+            playerObject.ExecuteLookAtReleased (playerObject);
         }
 
         void _UpdateInput () {
-            // if (cxAbstractSceneController.Instance.hasCharacterMovingControl)
-            //     keyInputController.HandleUserInput ();
 
-            keyInputController.HandleInput ();
-            // if (keyInputController.stateInput.moveTo) {
-            //     stateMachine.SendMessage ((int) MsgID.MoveTo, keyInputController.stateInput.moveToPos, 0);
-            // }
+            keyInputController.AcquireStateInput ();
+
+            if(stateInput.clickGround.HasValue) {
+                SetMoveToPosition(stateInput.clickGround.Value);
+            }
+
+            if(stateInput.clickTrigger !=null) {
+                playerObject.ExecuteTouchCommand (stateInput.clickTrigger, stateInput.clickPoint);
+            }
         }
 
         void _UpdateAnimator () {
@@ -360,7 +360,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
                 if (ENTER ()) {
                     directMoveController.enabled = true;
                     naviAgentMoveController.enabled = false;
-                    playerCommand.ExecuteSpawn (playerObject);
+                    playerObject.ExecuteSpawn (playerObject);
                     //cameraController.Follow (transform);
                 } else if (EXIT ()) {
 
@@ -419,7 +419,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
 
                     _UpdateInput ();
 
-                    if (keyInputController.stateInput.hasMoveInput ()) {
+                    if (stateInput.hasMoveInput ()) {
                         stateMachine.SendMessage ((int) MsgID.ArrivedTo, null, 0);
                     }
 
@@ -470,10 +470,10 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
                     _UpdateInput ();
                     _UpdateLookAtState ();
 
-                    if (keyInputController.stateInput.hasMoveInput ()) {
-                        keyInputController.stateInput.Consumed ();
-                        keyInputController.stateInput.Consumed2 ();
-                        keyInputController.stateInput.stand = true;
+                    if (stateInput.hasMoveInput ()) {
+                        stateInput.ConsumedActionInput ();
+                        stateInput.ConsumedLookInput ();
+                        stateInput.stand = true;
                         animator.SetBool (_animIDSit, false);
 
                         SET_STATE (StateID.Default);

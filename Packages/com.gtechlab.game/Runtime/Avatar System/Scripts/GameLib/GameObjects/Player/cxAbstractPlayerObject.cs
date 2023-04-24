@@ -12,7 +12,7 @@ public abstract class cxAbstractPlayerObject : MonoBehaviour {
     public Transform nameTagAnchor;
 
     private bool isSandbox = false;
-    private cxAvatarLocalStateController localPlayerController;
+    private cxAvatarLocalStateController stateController;
 
     public TAvatarProfileModel avatarProfile {get ; private set;}
     public event Action<EmotionCode> onEmoticon;
@@ -20,7 +20,7 @@ public abstract class cxAbstractPlayerObject : MonoBehaviour {
     public static event Action<cxAbstractPlayerObject, string> OnMessage;
 
     protected virtual void Awake() {
-        localPlayerController = GetComponent<cxAvatarLocalStateController>();
+        stateController = GetComponent<cxAvatarLocalStateController>();
     }
 
     protected virtual void Start () {
@@ -51,7 +51,8 @@ public abstract class cxAbstractPlayerObject : MonoBehaviour {
     private void SetupLocalPlayerController () {
 
         GetComponent<cxAvatarLocalStateController> ().enabled = true;
-        localPlayerController.StartLocalPlayer ();
+        stateController.StartLocalPlayer ();
+        cxAbstractSceneController.Instance.AcquireFocus(gameObject);
         
         /*
 
@@ -101,13 +102,10 @@ public abstract class cxAbstractPlayerObject : MonoBehaviour {
         onEmoticon?.Invoke (emoId);
     }
 
-    // public void TargetReposition (Vector3 pos, Quaternion rot) {
-    //     Debug.Log ("[SceneRepo] TargetReposition");
-
-    //     transform.position = pos;
-    //     transform.rotation = rot;
-
-    //     localPlayerController.naviAgentMoveController.ResetNavMeshAgent ();
-    // }
+    public abstract void ExecuteSpawn (cxAbstractPlayerObject playerController);
+    public virtual void ExecuteLookAt (cxAbstractPlayerObject playerController, cxTrigger trigger) { }
+    public virtual void ExecuteLookAtReleased (cxAbstractPlayerObject playerController) { }
+    public virtual void ExecuteTouchCommand (cxTrigger trigger) { }
+    public virtual void ExecuteTouchCommand (cxTrigger trigger, Vector3 touchPoint) { }
 
 }

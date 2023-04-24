@@ -10,8 +10,9 @@ public class TAvatarProfileModel
     public string userName;
     public string greeting;
     public string photo;
-    public TAvatarEquipSetModel equipSet;
     public int gender;
+
+    public TAvatarEquipSetModel equipSet;
 }
 
 [Serializable]

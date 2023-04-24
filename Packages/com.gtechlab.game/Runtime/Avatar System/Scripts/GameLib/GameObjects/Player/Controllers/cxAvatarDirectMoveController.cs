@@ -68,7 +68,7 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
     private Animator _animator;
     private CharacterController _controller;
     private cxAvatarLocalStateController _stateController;
-    private cxAvatarKeyInputController keyInputController;
+  //  private cxAvatarKeyInputController keyInputController;
 
     private const float _threshold = 0.01f;
 
@@ -78,7 +78,7 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
         _hasAnimator = TryGetComponent (out _animator);
         _controller = GetComponent<CharacterController> ();
         _stateController = GetComponent<cxAvatarLocalStateController> ();
-        keyInputController = GetComponent<cxAvatarKeyInputController> ();
+       // keyInputController = GetComponent<cxAvatarKeyInputController> ();
     }
 
     private void Start () {
@@ -97,12 +97,12 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
 
         Move ();
 
-        keyInputController.stateInput.Consumed ();
+        _stateController.stateInput.ConsumedActionInput ();
     }
 
     private void LateUpdate () {
         //CameraRotation();
-        keyInputController.stateInput.Consumed2 ();
+        _stateController.stateInput.ConsumedLookInput ();
     }
 
     private void GroundedCheck () {
@@ -183,13 +183,13 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
 
     private void Move () {
         // set target speed based on move speed, sprint speed and if sprint is pressed
-        float targetSpeed = keyInputController.stateInput.sprint ? SprintSpeed : MoveSpeed;
+        float targetSpeed = _stateController.stateInput.sprint ? SprintSpeed : MoveSpeed;
 
         // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
         // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
         // if there is no input, set the target speed to 0
-        if (keyInputController.stateInput.move == Vector2.zero) targetSpeed = 0.0f;
+        if (_stateController.stateInput.move == Vector2.zero) targetSpeed = 0.0f;
 
         // a reference to the players current horizontal velocity
         float currentHorizontalSpeed = new Vector3 (_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
@@ -223,11 +223,11 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
         //_animationBlend = Mathf.Lerp (_animationBlend, targetSpeed, speedChangeLerpTime);
 
         // normalise input direction
-        Vector3 inputDirection = new Vector3 (keyInputController.stateInput.move.x, 0, keyInputController.stateInput.move.y).normalized;
+        Vector3 inputDirection = new Vector3 (_stateController.stateInput.move.x, 0, _stateController.stateInput.move.y).normalized;
 
         // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
         // if there is a move input rotate player when the player is moving
-        if (keyInputController.stateInput.move != Vector2.zero) {
+        if (_stateController.stateInput.move != Vector2.zero) {
 
             var playerCamera = cxAbstractSceneController.Instance.GetPlayerCamera ();
 
@@ -274,7 +274,7 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
             }
 
             // Jump
-            if (keyInputController.stateInput.jump && _jumpTimeoutDelta <= 0.0f) {
+            if (_stateController.stateInput.jump && _jumpTimeoutDelta <= 0.0f) {
                 // the square root of H * -2 * G = how much velocity needed to reach desired height
                 _verticalVelocity = Mathf.Sqrt (JumpHeight * -2f * Gravity);
 
@@ -307,7 +307,7 @@ public sealed class cxAvatarDirectMoveController : MonoBehaviour {
             }
 
             // if we are not grounded, do not jump
-            keyInputController.stateInput.jump = false;
+            _stateController.stateInput.jump = false;
         }
 
         // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)

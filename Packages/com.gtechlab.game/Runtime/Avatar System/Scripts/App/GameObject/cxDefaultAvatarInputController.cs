@@ -2,14 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class cxAvatarKeyInputController : MonoBehaviour {
-    // public cxAvatarStateOutput stateOutput { get; private set; } = new cxAvatarStateOutput ();    private cxAbstractPlayerCommand playerCommand;
-    public cxAvatarStateInput stateInput { get; private set; } = new cxAvatarStateInput ();
+public class cxDefaultAvatarInputController : cxAbstractAvatarInputController {
+    // public cxAvatarStateInput stateInput { get; private set; } = new cxAvatarStateInput ();
 
-    public bool enableClickNMove= true;
+    public bool enableClickNMove = true;
     public bool enableDirectMove = true;
     public float rotateKeySensitive = 10.0f;
-    private cxAbstractPlayerCommand playerCommand;
+    private cxAbstractPlayerObject playerObject;
+    // private cxAbstractPlayerCommand playerCommand;
     private cxAvatarLocalStateController localStateController;
 
     private KeyCode lastKeyCode;
@@ -17,15 +17,16 @@ public class cxAvatarKeyInputController : MonoBehaviour {
     private bool doubleTapState;
 
     private void Awake () {
-        playerCommand = GetComponent<cxAbstractPlayerCommand> ();
+        playerObject = GetComponent<cxAbstractPlayerObject> ();
         localStateController = GetComponent<cxAvatarLocalStateController> ();
     }
 
-    public void HandleInput () {
-        if (cxAbstractSceneController.Instance.hasCharacterMovingControl)
+    public override void AcquireStateInput () {
+        if (cxAbstractSceneController.Instance.HasFocus(gameObject))
             HandleUserInput ();
 
         HandleMouseInput ();
+        
         // if(stateInput.moveTo) {
         //         stateMachine.SendMessage ((int) MsgID.MoveTo, keyInputController.stateInput.moveToPos, 0);
         // }
@@ -91,13 +92,44 @@ public class cxAvatarKeyInputController : MonoBehaviour {
             // Hold(false);
         }
 
-        if(enableDirectMove) {
-            stateInput.MoveInput (move);
-            stateInput.SprintInput (run);
-            stateInput.JumpInput (jump);
-            stateInput.LookInput (look * rotateKeySensitive);
+        if (enableDirectMove) {
+            localStateController.stateInput.MoveInput (move);
+            localStateController.stateInput.SprintInput (run);
+            localStateController.stateInput.JumpInput (jump);
+            localStateController.stateInput.LookInput (look * rotateKeySensitive);
         }
     }
+
+    /*
+        private void HandleMouseInput () {
+            Vector3? clickPoint = null;
+            if (Input.GetMouseButtonDown (0)) {
+                clickPoint = Input.mousePosition;
+            }
+
+            if (clickPoint.HasValue) {
+                var physics = gameObject.scene.GetPhysicsScene ();
+                var ray = Camera.main.ScreenPointToRay (clickPoint.Value);
+                if (!cxUISystemUtil.IsMousePointerOnUI (0)) {
+                    if (physics.Raycast (ray.origin, ray.direction, out RaycastHit hitted, float.MaxValue)) {
+                        int hitLayerMask = 1 << hitted.collider.gameObject.layer;
+
+                        if ((hitLayerMask & localStateController.movingGroundMask.value) != 0) {
+                           // stateInput.MoveToInput (hitted.point);
+                           if(enableClickNMove)
+                                localStateController.SetMoveToPosition(hitted.point);
+
+                        } else if (hitLayerMask == 256) {
+                            Debug.Log ("hitted : " + hitted.transform.gameObject.name);
+                            var trigger = hitted.transform.gameObject.GetComponent<cxTrigger> ();
+                            if (trigger)
+                                playerObject.ExecuteTouchCommand (trigger, hitted.point);
+                        }
+                    }
+                }
+            }
+        }
+        */
 
     private void HandleMouseInput () {
         Vector3? clickPoint = null;
@@ -113,15 +145,18 @@ public class cxAvatarKeyInputController : MonoBehaviour {
                     int hitLayerMask = 1 << hitted.collider.gameObject.layer;
 
                     if ((hitLayerMask & localStateController.movingGroundMask.value) != 0) {
-                       // stateInput.MoveToInput (hitted.point);
-                       if(enableClickNMove)
-                            localStateController.SetMoveToPosition(hitted.point);
+                        // stateInput.MoveToInput (hitted.point);
+                        if (enableClickNMove)
+                            localStateController.stateInput.clickGround = hitted.point;
 
                     } else if (hitLayerMask == 256) {
                         Debug.Log ("hitted : " + hitted.transform.gameObject.name);
                         var trigger = hitted.transform.gameObject.GetComponent<cxTrigger> ();
-                        if (trigger)
-                            playerCommand.ExecuteTouchCommand (trigger, hitted.point);
+                        if (trigger) {
+                            localStateController.stateInput.clickTrigger = trigger;
+                            localStateController.stateInput.clickPoint = hitted.point;
+                        }
+                        // playerObject.ExecuteTouchCommand (trigger, hitted.point);
                     }
                 }
             }
