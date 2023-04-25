@@ -10,6 +10,7 @@ public class cxDefaultAvatarConfig : ScriptableObject
 
     //[AssetPath.Attribute(typeof(Object))]
     public string avatarMeshBasePath;
+    public string avatarIconBasePath;
     //[AssetPath.Attribute(typeof(Object))]
     public string avatarDataTablePath;
 

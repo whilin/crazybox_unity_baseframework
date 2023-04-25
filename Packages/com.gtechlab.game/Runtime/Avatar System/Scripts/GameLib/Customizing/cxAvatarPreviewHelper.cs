@@ -10,6 +10,7 @@ public class cxAvatarPreviewHelper : MonoBehaviour
 
     [ContextMenu("Build")]
     void Build(){
+        cxAvatarMeshAssembly.ClearSkinnedMeshs(gameObject);
         cxAvatarMeshAssembly.AssemblyAvatar(gameObject, previewParts);
     }
 

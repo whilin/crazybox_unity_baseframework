@@ -12,10 +12,10 @@ public class cxUniversalResourceLoader : cxSingleton<cxUniversalResourceLoader> 
 
     public async Task < (bool need, int size) > IsRequireDownload (string url) {
         if (cxResourceNaming.IsBundle (url, out string bundleName, out string path)) {
-            var bundleData = cxOnDemandBundleLoader.Instance.LoadBundle (bundleName);
+            var bundleData = cxOnDemandBundleLoader.Instance.GetBundleData (bundleName);
             return (!(bundleData.IsCached () || bundleData.IsReady), (int) bundleData.size);
         } else if (cxResourceNaming.IsResource (url, out string resourceId, out path)) {
-            var bundleData = await cxResourceBundleLoader.Instance.LoadBundle (resourceId);
+            var bundleData = await cxResourceBundleLoader.Instance.GetBundleData (resourceId);
             return (!(bundleData.IsCached () || bundleData.IsReady), (int) bundleData.resourceDesc.bundleSize);
         } else if (cxResourceNaming.IsHttp (url)) {
             return (!cxCachedWebContentLoader.Instance.HasCache (url), 0);

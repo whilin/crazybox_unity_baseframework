@@ -66,7 +66,7 @@ public class cxDefaultGamePlayerBloc : cxIGamePlayerBloc {
         PlayerPrefs.Save ();
     }
 
-    public override void ChangeAvatarEquipSet(TAvatarEquipSetModel equipSet)
+    public override void ChangeAvatarEquipSet(TAvatarEquipSetModel equipSet, bool preview = false)
     {
         throw new NotImplementedException();
     }
