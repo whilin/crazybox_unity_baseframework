@@ -22,7 +22,8 @@ public class cxDefaultAvatarInputController : cxAbstractAvatarInputController {
     }
 
     public override void AcquireStateInput () {
-        if (cxAbstractSceneController.Instance.HasFocus(gameObject))
+     //   if (cxAbstractSceneController.Instance.HasFocus(gameObject))
+        if (cxAbstractSceneController.Instance.hasCharacterMovingControl)
             HandleUserInput ();
 
         HandleMouseInput ();

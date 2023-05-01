@@ -52,7 +52,7 @@ public abstract class cxAbstractPlayerObject : MonoBehaviour {
 
         GetComponent<cxAvatarLocalStateController> ().enabled = true;
         stateController.StartLocalPlayer ();
-        cxAbstractSceneController.Instance.AcquireFocus(gameObject);
+       // cxAbstractSceneController.Instance.AcquireFocus(gameObject);
         
         /*
 

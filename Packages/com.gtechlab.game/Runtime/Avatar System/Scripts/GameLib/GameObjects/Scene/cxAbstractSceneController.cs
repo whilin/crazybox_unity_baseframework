@@ -12,13 +12,13 @@ public abstract class cxAbstractSceneController : MonoSingleton<cxAbstractSceneC
     [SerializeField]
     protected cxAbstractPlayerObject playerObject;
 
-    //public bool hasCharacterMovingControl { get; set; } = true;
+    public bool hasCharacterMovingControl { get; set; } = true;
 
     private GameObject focusObject = null;
     public cxPlayerCameraController GetPlayerCamera() { return playerCamera ;}
     public cxAbstractPlayerObject GetPlayerObject(){ return playerObject; }
 
-    public void AcquireFocus(GameObject focus) { focusObject = focus;}
-    public bool HasFocus(GameObject obj) { return focusObject == obj; }
-    public bool FocusReleased() { return focusObject == null;}
+    // public void AcquireFocus(GameObject focus) { focusObject = focus;}
+    // public bool HasFocus(GameObject obj) { return focusObject == obj; }
+    // public bool FocusReleased() { return focusObject == null;}
 }
