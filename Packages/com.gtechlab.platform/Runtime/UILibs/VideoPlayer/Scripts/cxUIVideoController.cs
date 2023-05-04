@@ -18,12 +18,13 @@ public class cxUIVideoController : MonoBehaviour {
     public int hideScreenControlTime = 0;
     public Slider playbackSlider;
     //public Slider speedSlider;
-    public Slider volumeSlider;
+    // public Slider volumeSlider;
     public Text currentTime;
     public Text totalTime;
     public Button playButton;
     public Button pauseButton;
-    public Button volumeButton;
+    public Button volumeOnButton;
+    public Button volumeOffButton;
 
     //
     public GameObject loading;
@@ -32,7 +33,7 @@ public class cxUIVideoController : MonoBehaviour {
     public Text errorText;
 
     private bool showPlayerControl = false;
-    private bool showingVolume = false;
+    public bool volumeOn = false; //Note. 시작시 볼륨 on/off 컨트롤 가능
     private bool seeking = false;
 
     public UnityEvent OnVideoReady = new UnityEvent ();
@@ -47,11 +48,11 @@ public class cxUIVideoController : MonoBehaviour {
         _player.seekCompleted += _onVideoSeekCompleted;
         _player.errorReceived += _onVideoError;
 
-        volumeSlider.minValue = 0.0f;
-        volumeSlider.maxValue = 1.0f;
-        volumeSlider.onValueChanged.AddListener ((value) => {
-            ChangeVolume (value);
-        });
+        // volumeSlider.minValue = 0.0f;
+        // volumeSlider.maxValue = 1.0f;
+        // volumeSlider.onValueChanged.AddListener ((value) => {
+        //     ChangeVolume (value);
+        // });
 
         playbackSlider.maxValue = 1.0f;
         playbackSlider.minValue = 0.0f;
@@ -68,16 +69,19 @@ public class cxUIVideoController : MonoBehaviour {
         });
 
         touchDelegator.onPointerClick.AddListener (() => {
-            // if (showPlayerControl)
-            //     HideControlPanel ();
-            // else
-            //     ShowControlPanel (true);
+            if (showPlayerControl)
+                HideControlPanel ();
+            else
+                ShowControlPanel (true);
 
-            ShowControlPanel (true);
+           // ShowControlPanel (true);
         });
 
-        volumeButton.onClick.AddListener (() => {
-            ToggleVolumeSlider ();
+        volumeOnButton.onClick.AddListener (() => {
+            ToggleVolumeControl (true);
+        });
+        volumeOffButton.onClick.AddListener (() => {
+            ToggleVolumeControl (false);
         });
     }
 
@@ -103,6 +107,8 @@ public class cxUIVideoController : MonoBehaviour {
         _player.Play ();
         loading.SetActive (false);
         ShowControlPanel (true);
+
+        ToggleVolumeControl (volumeOn);
     }
 
     void _onVideoEnded (VideoPlayer vp) {
@@ -117,11 +123,11 @@ public class cxUIVideoController : MonoBehaviour {
         loading.SetActive (false);
         ShowControlPanel (true);
     }
-    void _onVideoError(VideoPlayer vp, string message){
+    void _onVideoError (VideoPlayer vp, string message) {
         loading.SetActive (false);
         ShowControlPanel (false);
 
-        errorPanel.SetActive(true);
+        errorPanel.SetActive (true);
         errorText.text = message;
     }
 
@@ -134,10 +140,10 @@ public class cxUIVideoController : MonoBehaviour {
 
         seeking = false;
         loading.SetActive (true);
-        errorPanel.SetActive(false);
+        errorPanel.SetActive (false);
         HideControlPanel ();
     }
-    
+
     public void Play (string url) {
         if (cxResourceNaming.IsHttp (url)) {
             _player.url = url;
@@ -163,7 +169,7 @@ public class cxUIVideoController : MonoBehaviour {
 
         } catch (Exception ex) {
             Debug.LogException (ex);
-            errorPanel.SetActive(true);
+            errorPanel.SetActive (true);
             errorText.text = ex.Message;
         }
     }
@@ -175,8 +181,7 @@ public class cxUIVideoController : MonoBehaviour {
 
     public void Play () {
         _player.Play ();
-
-        ShowControlPanel (true);
+        HideControlPanel ();
     }
 
     public void Pause () {
@@ -220,6 +225,17 @@ public class cxUIVideoController : MonoBehaviour {
 
     Coroutine coAutoHideControlPanel;
 
+    public void ToggleVolumeControl (bool on) {
+
+        volumeOn = on;
+        volumeOffButton.gameObject.SetActive (on);
+        volumeOnButton.gameObject.SetActive (!on);
+        ChangeVolume (on ? 1 : 0);
+
+        //Note. Hide Time 확장
+        ShowControlPanel (true);
+    }
+
     public void ShowControlPanel (bool autoHide = false) {
         if (!showPlayerControl) {
             controlPanel.Play ();
@@ -245,21 +261,9 @@ public class cxUIVideoController : MonoBehaviour {
             StopCoroutine (coAutoHideControlPanel);
 
         controlPanel.Hide ();
-        volumeSlider.gameObject.SetActive (false);
         onPlayTimeSlider.gameObject.SetActive (true);
 
         showPlayerControl = false;
-        showingVolume = false;
-    }
-
-    public void ToggleVolumeSlider () {
-        if (showingVolume) {
-            showingVolume = false;
-            volumeSlider.gameObject.SetActive (false);
-        } else {
-            showingVolume = true;
-            volumeSlider.gameObject.SetActive (true);
-        }
     }
 
     private void Update () {
