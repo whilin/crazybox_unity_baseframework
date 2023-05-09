@@ -28,7 +28,7 @@ public static class cxResourceNaming {
             path = url.Substring (streamming.Length);
             return true;
         }
-  
+
         path = null;
         return false;
     }
@@ -82,7 +82,7 @@ public static class cxResourceNaming {
 #if UNITY_ANDROID
         platformName = "Android";
 #elif UNITY_IOS
-        platformName = "IOS";
+        platformName = "iOS";
 #elif UNITY_WEBGL 
         platformName = "WebGL";
 #else
@@ -92,10 +92,12 @@ public static class cxResourceNaming {
         return platformName;
     }
 
-    public static string ToAppStreamingPath ( string path) {
-        var newPath = Path.Combine(Application.streamingAssetsPath , path);
+    public static string ToAppStreamingPath (string path) {
+        var newPath = Path.Combine (Application.streamingAssetsPath, path);
 
 #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+        newPath = "file://" + newPath;
+#elif UNITY_IOS
         newPath = "file://" + newPath;
 #endif
         return newPath;

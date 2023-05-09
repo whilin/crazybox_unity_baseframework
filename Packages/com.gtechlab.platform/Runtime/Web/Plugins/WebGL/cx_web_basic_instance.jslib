@@ -44,16 +44,20 @@ mergeInto(LibraryManager.library, {
         return buffer;
     },
 
-    installCallback: function () {
+    installEventCallback: function () {
 
-        window.cxCallback = function(jsonParamter) {
-            cxGameInstance.SendMessage('cxWebBasicInstance', 'OnCallback', jsonParamter);
+        window.cxCallback = function(eventName, jsonParameters) {
+            cxGameInstance.SendMessage('cxWebBasicInstance', 'OnEventCallback',eventName, jsonParameters);
         }
 
-        parent.window.cxCallback = function(jsonParamter) {
-            cxGameInstance.SendMessage('cxWebBasicInstance', 'OnCallback', jsonParamter);
+        parent.window.cxCallback = function(eventName, jsonParameters) {
+            cxGameInstance.SendMessage('cxWebBasicInstance', 'OnEventCallback',eventName, jsonParameters);
         }
 
         console.log('cxWebInstance: installCallback completed')
+    }
+
+    isMobilePlatform : function() {
+        return UnityWebGLTools.isMobileDevice()
     }
 });

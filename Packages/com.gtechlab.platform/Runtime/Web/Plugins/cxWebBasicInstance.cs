@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 using UniRx;
 using UnityEngine;
 
-public class cxWebCallbackObject {
+public class cxWebEventCallbackObject {
     public string eventName;
     public Dictionary<string, object> arguments;
 
@@ -37,23 +37,27 @@ public class cxWebBasicInstance : MonoBehaviour {
     private static extern string setCookie (string cname, string cvalue, int expireDays);
 
     [DllImport ("__Internal")]
-    private static extern void installCallback ();
+    private static extern void isMobilePlatform ();
+
+    [DllImport ("__Internal")]
+    private static extern void installEventCallback ();
+
 #endif
 
-    private Subject<cxWebCallbackObject> webEventCall = new Subject<cxWebCallbackObject> ();
-    public IObservable<cxWebCallbackObject> webEventCallAsObservable => webEventCall.AsObservable ();
+    private Subject<cxWebEventCallbackObject> webEventCall = new Subject<cxWebEventCallbackObject> ();
+    public IObservable<cxWebEventCallbackObject> webEventCallAsObservable => webEventCall.AsObservable ();
 
     private void Awake () {
         if (!gameObject.name.Equals ("cxWebBasicInstance")) {
             Debug.LogError ("cxWebBasicInstance must named with cxWebBasicInstance but " + gameObject.name);
         }
 
-        InstallCallback ();
+        InstallEventCallback ();
     }
 
-    private void InstallCallback () {
+    private void InstallEventCallback () {
 #if UNITY_WEBGL && !UNITY_EDITOR
-        installCallback ();
+        installEventCallback ();
 #endif
     }
 
@@ -101,16 +105,20 @@ public class cxWebBasicInstance : MonoBehaviour {
     }
     */
 
-    void OnCallback (string jsonParameter) {
+    void OnEventCallback (string eventName, string arguments) {
+        cxLog.Log("cxWebBasicInstance OnEventCallback eventName:"+eventName+", arguments:"+arguments);
+        var argObj = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>> (arguments);
 
-        var webObj = Newtonsoft.Json.JsonConvert.DeserializeObject<cxWebCallbackObject> (jsonParameter);
-        if (string.IsNullOrEmpty (webObj.eventName)) {
-            Debug.LogWarning ("cxWebBasicInstance Callback Format Error, eventName not found :" + jsonParameter);
-            return;
-        }
+        // if (string.IsNullOrEmpty (webObj.eventName)) {
+        //     Debug.LogWarning ("cxWebBasicInstance Callback Format Error, eventName not found :" + arguments);
+        //     return;
+        // }
 
-        cxLog.Log("cxWebBasicInstance Callback eventName:"+webObj.eventName);
+        cxWebEventCallbackObject obj = new cxWebEventCallbackObject(){
+            eventName = eventName,
+            arguments = argObj
+        };
 
-        webEventCall.OnNext (webObj);
+        webEventCall.OnNext (obj);
     }
 }

@@ -38,17 +38,25 @@ public class cxUniversalResourceLoader : cxSingleton<cxUniversalResourceLoader> 
                     onProgress (p);
             });
 
+              if(!bundleData.IsReady){
+            throw new Exception("cxUniversalResourceLoader.LoadAsset load error:" + bundleData.errorMsg);
+           }
+
             var obj = bundleData.assetBundle.LoadAsset<T> (path);
             return obj;
         } else if (cxResourceNaming.IsResource (url, out string resourceId, out path)) {
             var bundleData = await cxResourceBundleLoader.Instance.LoadBundle (resourceId);
             if (bundleData == null)
-                throw new Exception ("cxUniversalResourceLoader.LoadScene resourceBundle not found:" + resourceId);
+                throw new Exception ("cxUniversalResourceLoader.LoadAsset resourceBundle not found:" + resourceId);
 
             await bundleData.WaitForLoad ((float p) => {
                 if (onProgress != null)
                     onProgress (p);
             });
+
+           if(!bundleData.IsReady){
+            throw new Exception("cxUniversalResourceLoader.LoadAsset load error:" + bundleData.errorMsg);
+           }
 
             if (string.IsNullOrEmpty (path))
                 path = bundleData.GetMainAssetName ();
