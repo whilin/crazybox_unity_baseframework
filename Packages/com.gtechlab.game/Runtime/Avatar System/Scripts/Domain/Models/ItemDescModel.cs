@@ -3,7 +3,7 @@ public enum ItemType {
     Gold = 1,
     Gear = 2,
     
-    ItemExt1 = 10,
+    ItemExt1 = 10, 
     ItemExt2 = 11,
     ItemExt3 = 12,
 }
@@ -24,3 +24,16 @@ public abstract class TBaseItemDescModel {
     public string iconName;
     public int price;
 } 
+
+public class TGoldItemDescModle  : TBaseItemDescModel{
+    //Fixed!!
+    //ItemType = 1,
+    //itemCode = 1,
+
+    public TGoldItemDescModle(){
+        itemType = ItemType.Gold;
+        itemCode = 1;
+        itemName = "Gold";
+        price = 0;
+    }
+}

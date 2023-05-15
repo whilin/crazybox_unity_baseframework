@@ -1,24 +1,37 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
 public class cxUIVideoController : MonoBehaviour {
+    public enum VideoState {
+        Init,
+        Loading,
+        Error,
+        Ready,
+        Play,
+        Pause,
+        Seeking,
+    }
+
     public VideoPlayer _player;
     public RawImage _playerRenderer;
     public AspectRatioFitter aspectRatio;
-    public Slider onPlayTimeSlider;
+
     public cxUITouchDelegator touchDelegator;
 
-    //
+    [Header ("On Play Time Panel")]
+    public Slider onPlayTimeSlider;
+
+    [Header ("On Control Time Panel")]
     public cxUITweenPanel controlPanel;
     public int hideScreenControlTime = 0;
     public Slider playbackSlider;
-    //public Slider speedSlider;
-    // public Slider volumeSlider;
     public Text currentTime;
     public Text totalTime;
     public Button playButton;
@@ -26,14 +39,22 @@ public class cxUIVideoController : MonoBehaviour {
     public Button volumeOnButton;
     public Button volumeOffButton;
 
-    //
+    [Header ("Loading State")]
     public GameObject loading;
 
+    [Header ("On Error Panel")]
     public GameObject errorPanel;
     public Text errorText;
 
-    private bool showPlayerControl = false;
+    [Header ("Default Volume State")]
     public bool volumeOn = false; //Note. 시작시 볼륨 on/off 컨트롤 가능
+
+    //private bool showPlayerControl = false;
+    ReactiveProperty<bool> showPlayerControl = new ReactiveProperty<bool> (false);
+    public IObservable<bool> ShowPlayerControlAsObservable => showPlayerControl.AsObservable ();
+
+    ReactiveProperty<VideoState> videoState = new ReactiveProperty<VideoState> (VideoState.Init);
+
     private bool seeking = false;
 
     public UnityEvent OnVideoReady = new UnityEvent ();
@@ -69,17 +90,18 @@ public class cxUIVideoController : MonoBehaviour {
         });
 
         touchDelegator.onPointerClick.AddListener (() => {
-            if (showPlayerControl)
+            if (showPlayerControl.Value)
                 HideControlPanel ();
             else
                 ShowControlPanel (true);
 
-           // ShowControlPanel (true);
+            // ShowControlPanel (true);
         });
 
         volumeOnButton.onClick.AddListener (() => {
             ToggleVolumeControl (true);
         });
+
         volumeOffButton.onClick.AddListener (() => {
             ToggleVolumeControl (false);
         });
@@ -92,6 +114,7 @@ public class cxUIVideoController : MonoBehaviour {
     private void OnDestroy () {
         _player.Stop ();
     }
+
     void _onVideoReady (VideoPlayer vp) {
         var totalTime = _player.length;
 
@@ -99,9 +122,9 @@ public class cxUIVideoController : MonoBehaviour {
         _playerRenderer.texture = _player.targetTexture;
         _playerRenderer.color = Color.white;
 
-        var canvas = _playerRenderer.transform.parent as RectTransform;
-        var cRatio = canvas.rect.width / canvas.rect.height;
-        aspectRatio.aspectRatio = cRatio;
+       // var canvas = _playerRenderer.transform.parent as RectTransform;
+       // var cRatio = canvas.rect.width / canvas.rect.height;
+        aspectRatio.aspectRatio = (float)  _player.width / (float) _player.height;
 
         OnVideoReady.Invoke ();
         _player.Play ();
@@ -123,6 +146,7 @@ public class cxUIVideoController : MonoBehaviour {
         loading.SetActive (false);
         ShowControlPanel (true);
     }
+
     void _onVideoError (VideoPlayer vp, string message) {
         loading.SetActive (false);
         ShowControlPanel (false);
@@ -237,9 +261,9 @@ public class cxUIVideoController : MonoBehaviour {
     }
 
     public void ShowControlPanel (bool autoHide = false) {
-        if (!showPlayerControl) {
+        if (!showPlayerControl.Value) {
             controlPanel.Play ();
-            showPlayerControl = true;
+            showPlayerControl.Value = true;
         }
 
         onPlayTimeSlider.gameObject.SetActive (false);
@@ -263,7 +287,7 @@ public class cxUIVideoController : MonoBehaviour {
         controlPanel.Hide ();
         onPlayTimeSlider.gameObject.SetActive (true);
 
-        showPlayerControl = false;
+        showPlayerControl.Value = false;
     }
 
     private void Update () {

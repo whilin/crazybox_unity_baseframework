@@ -55,7 +55,7 @@ mergeInto(LibraryManager.library, {
         }
 
         console.log('cxWebInstance: installCallback completed')
-    }
+    },
 
     isMobilePlatform : function() {
         return UnityWebGLTools.isMobileDevice()

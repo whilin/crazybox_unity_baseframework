@@ -21,4 +21,10 @@ public class TUserInvenItemModel {
     public int itemCode;
     public int invenCode;
     public int quantity;
+    public int flag;
+}
+
+public enum TInvenItemFlag {
+    Undef =0 ,
+    New = 1
 }

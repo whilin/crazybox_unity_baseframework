@@ -54,6 +54,30 @@ public abstract class cxResourceBuilder {
         }
     }
 
+     [MenuItem ("Tools/G-Tech Lab/Build All Resource Bundle(No Upload)")]
+    public static void BuildAllResourceNoUpload () {
+        try {
+            var defs = AssetDatabase.FindAssets ("t:cxResourceDefinition");
+
+            List<cxResourceDescModel> list = new List<cxResourceDescModel> ();
+
+            foreach (var guid in defs) {
+                var path = AssetDatabase.GUIDToAssetPath (guid);
+                var def = AssetDatabase.LoadAssetAtPath<cxResourceDefinition> (path);
+                var desc = BuildResource (def);
+                list.Add (desc);
+            }
+
+            // foreach (var desc in list) {
+            //     BuildPackage (desc);
+            // }
+
+        } catch (Exception ex) {
+            Debug.LogError (ex);
+            cxEditorWindowUtils.ShowErrorMessage ("Build All Resource Bundle", ex.Message);
+        }
+    }
+
     [MenuItem ("Tools/G-Tech Lab/Clear Bundle Caching")]
     public static void ClearBundleCache () {
         Caching.ClearCache ();

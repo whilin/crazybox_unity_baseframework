@@ -42,6 +42,10 @@ public class cxUIVideoPlayFrame : cxUIParameterFrame<cxUIVideoPlayFrame.FrameArg
             PopResult (playTime);
             // ytPlayer.Stop ();
         });
+
+        contoller.ShowPlayerControlAsObservable.Subscribe(show => {
+            
+        });
     }
 
     protected override void OnActivated (FrameArgs frameArgs) {
