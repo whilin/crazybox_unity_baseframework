@@ -9,18 +9,21 @@ using System;
 
 public abstract class cxUIParameterFrame<T> : cxUIFrame where T : class, new () {
 
+    protected T frameArgs { get; private set;}
+
     public static T CreateFrameArgs() {
         return new T();
     }
 
-    protected sealed override void OnActivated (object showParam)  {
-        if(showParam == null)
+    protected sealed override void OnActivated (object frameArgs)  {
+        if(frameArgs == null)
             throw new ArgumentNullException("Frame Object name:"+gameObject.name);
-        if(!(showParam is T))
+        if(!(frameArgs is T))
             throw new ArgumentNullException("illegal type argument Object name:"+gameObject.name);
 
-        OnActivated((T) showParam );
+        this.frameArgs = (T) frameArgs;
+        OnActivated((T) frameArgs );
     }
 
-    abstract protected void OnActivated (T showParam) ;
+    abstract protected void OnActivated (T frameArgs) ;
 }

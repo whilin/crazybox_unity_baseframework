@@ -6,6 +6,9 @@ public enum ItemType {
     ItemExt1 = 10, 
     ItemExt2 = 11,
     ItemExt3 = 12,
+    ItemExt4 = 13,
+    ItemExt5 = 14,
+
 }
 
 public enum ItemFlag {

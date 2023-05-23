@@ -78,6 +78,27 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         GetComponent<CharacterController> ().enabled = !hold;
     }
 
+    //TODO: Adhoc... 정상적인 상태 관리속으로 들어가야함!!!
+    public async void WarpTo(Vector3 position, Quaternion rotation) {
+        directMoveController.enabled = false;
+        naviAgentMoveController.enabled = false;
+        naviAgentMoveController.ResetNavMeshAgent ();
+
+        await new WaitForSeconds (0.2f);
+
+        transform.position = position;
+        transform.rotation = rotation;
+
+        stateMachine.SetState((int) StateID.Default);
+
+        directMoveController.enabled = true;
+        naviAgentMoveController.enabled = false;
+        
+                    // var trigger = (Transform) PARAM ();
+                    // StartCoroutine (WaitSetPosition (trigger));
+                    // stateMachine.SetTimeout (0.5f);
+    }
+
     public bool CanSitCommand () {
         StateID curState = (StateID) stateMachine.GetCurState ();
         return (curState == StateID.Default || curState == StateID.MoveTo || curState == StateID.PlayEmotion);
