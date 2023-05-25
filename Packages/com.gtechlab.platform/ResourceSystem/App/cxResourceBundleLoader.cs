@@ -172,17 +172,17 @@ public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
 
     public bool HasCachedVersion (string resourceId, string hash) {
 
-        string uri = resourceId; // cxResourceNaming.GetBundleURL (resourceLocation, resourceId, platformName);
-
+        string bundleName =  resourceId.Replace(".","_"); 
         var hash128 = Hash128.Parse (hash);
 
+        /*
         int count = Caching.cacheCount;
-
         List<string> cacheList = new List<string> ();
         Caching.GetAllCachePaths (cacheList);
+        */
 
         List<Hash128> cachedVersions = new List<Hash128> ();
-        Caching.GetCachedVersions (uri, cachedVersions);
+        Caching.GetCachedVersions (bundleName, cachedVersions);
         var cacheVersion = cachedVersions.Find (q => q.Equals (hash128));
 
         return cacheVersion.isValid;
@@ -193,7 +193,9 @@ public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
 
         try {
 
-            var req = UnityWebRequestAssetBundle.GetAssetBundle (uri, Hash128.Parse (hash));
+            CachedAssetBundle cached = new CachedAssetBundle(resourceId.Replace(".", "_"), Hash128.Parse (hash));
+            var req = UnityWebRequestAssetBundle.GetAssetBundle (uri, cached, 0);
+            
             var asyncOp = req.SendWebRequest ();
 
             while (!asyncOp.isDone && req.result == UnityWebRequest.Result.InProgress) {
@@ -204,18 +206,16 @@ public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
 
                 if (cancellationToken.HasValue) {
                     if (cancellationToken.Value.IsCancellationRequested) {
-                        // cancellationToken.Value.ThrowIfCancellationRequested();
                         req.Abort ();
                         throw new Exception ($"{resourceId} download aborted by user");
                     }
                 }
             }
 
+         
             if (req.result != UnityWebRequest.Result.Success) {
                 throw new Exception ("Bundle Load Exception :" + resourceId + " exception:" + req.error);
             }
-
-            // Caching.AddCache(uri);
 
             if (downloadState != null)
                 downloadState (0);

@@ -39,6 +39,9 @@ public class cxPlayerCameraController : MonoBehaviour {
         lookAtTarget = null;
     }
 
+    public void ResetCamera(){
+        transform.position = target.position - target.forward * cameraDistance;
+    }
     public void LookAt (Camera camera) {
         if (camera) {
             lookAtTarget = camera.transform;

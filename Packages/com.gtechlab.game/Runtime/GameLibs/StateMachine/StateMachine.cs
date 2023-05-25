@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using System;
 
 public enum FSMMsg
@@ -41,13 +42,21 @@ public class StateMachine
 	private int m_curState=0;
 	private int m_nextState=0;
 	private object m_nextStateParam = null;
-
 	private float m_thinkTimer = 0;
 	private float m_lastThink = 0;
 	private float m_timeoutTimer = 0;
 	private float m_timeoutTime = 0;
 
 	private ArrayList m_sendMsgs;
+
+	private object curStateParam = null;
+	private object prevStateParam = null;
+
+	//private List<int> stateStack = new List<int>();
+
+	public T GetStateParam<T>() => (T) curStateParam;
+	public int GetPreviousState() => m_prevState;
+	public object GetPrevStateParam() =>  prevStateParam;
 	
 	public StateMachine(DelegateProcessStateMachine handler)
 	{
@@ -130,6 +139,8 @@ public class StateMachine
 			SetThink (0);
 
 			InvokeHandle(m_curState, FSMMsg.OnEnter, m_prevState, m_nextStateParam);
+			prevStateParam = curStateParam;
+			curStateParam = m_nextStateParam;
 			m_nextStateParam = null;
 		}
 	}

@@ -4,17 +4,14 @@ using UniRx.Triggers;
 using UnityEngine;
 
 public sealed class cxAvatarLocalStateController : MonoBehaviour {
-    //public static bool hasCharacterMovingControl { get; set; } = true;
+
     public Transform playerCameraRoot;
     public Animator animator;
     public float rotateSpeed = 10.0f;
 
     public LayerMask movingGroundMask;
-
     public Collider playerBoundingBox;
 
-    // [SerializeField]
-    // private bool isSandbox = false;
     private bool isLocalPlayer = false;
     private bool isAnimatorPlay = false;
 
@@ -27,7 +24,6 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
     private cxAvatarDirectMoveController directMoveController;
     private cxAbstractAvatarInputController keyInputController;
     private cxAbstractPlayerObject playerObject;
-
 
     CompositeDisposable disposables = new CompositeDisposable ();
 
@@ -79,6 +75,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
     }
 
     //TODO: Adhoc... 정상적인 상태 관리속으로 들어가야함!!!
+    /*
     public async void WarpTo(Vector3 position, Quaternion rotation) {
         directMoveController.enabled = false;
         naviAgentMoveController.enabled = false;
@@ -93,10 +90,18 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
 
         directMoveController.enabled = true;
         naviAgentMoveController.enabled = false;
+
+
+         var playerCamera = cxAbstractSceneController.Instance.GetPlayerCamera ();
+         playerCamera.ResetCamera();
         
                     // var trigger = (Transform) PARAM ();
                     // StartCoroutine (WaitSetPosition (trigger));
                     // stateMachine.SetTimeout (0.5f);
+    }
+*/
+    public async void WarpTo (Transform warp) {
+        stateMachine.SendMessage ((int) MsgID.WarpTo, warp, 0);
     }
 
     public bool CanSitCommand () {
@@ -346,11 +351,11 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
 
             keyInputController.AcquireStateInput ();
 
-            if(stateInput.clickGround.HasValue) {
-                SetMoveToPosition(stateInput.clickGround.Value);
+            if (stateInput.clickGround.HasValue) {
+                SetMoveToPosition (stateInput.clickGround.Value);
             }
 
-            if(stateInput.clickTrigger !=null) {
+            if (stateInput.clickTrigger != null) {
                 playerObject.ExecuteTouchCommand (stateInput.clickTrigger, stateInput.clickPoint);
             }
         }
@@ -381,8 +386,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
                 if (ENTER ()) {
                     directMoveController.enabled = true;
                     naviAgentMoveController.enabled = false;
-                    playerObject.ExecuteSpawn (playerObject);
-                    //cameraController.Follow (transform);
+                //    playerObject.ExecuteSpawn (playerObject);
                 } else if (EXIT ()) {
 
                 } else if (UPDATE ()) {
@@ -550,6 +554,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         });
 
         stateMachine.SetState ((int) StateID.Default);
+        playerObject.ExecuteSpawn(playerObject);
     }
 
     IEnumerator WaitSetPosition (Transform point) {
@@ -557,7 +562,9 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
 
         transform.rotation = point.rotation;
         transform.position = point.position;
-
+        
+         var playerCamera = cxAbstractSceneController.Instance.GetPlayerCamera ();
+         playerCamera.ResetCamera();
     }
 
     IEnumerator WaitSetRotation (cxTrigger trigger) {

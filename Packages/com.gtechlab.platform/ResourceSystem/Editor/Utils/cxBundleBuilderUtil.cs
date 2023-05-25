@@ -14,7 +14,6 @@ public struct BundleTargetOutput {
     public string resourceHash;
     public string[] includeAssets;
     public string[] includeScenes;
-
 }
 
 public abstract class cxBundleBuilderUtil {
