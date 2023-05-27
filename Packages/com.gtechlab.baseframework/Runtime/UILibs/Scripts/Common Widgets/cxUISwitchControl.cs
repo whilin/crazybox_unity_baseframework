@@ -48,19 +48,19 @@ public class cxUISwitchControl : MonoBehaviour
         Set(isOn);
     }
 
-    public void Set(bool on)
+    public void Set(bool on, bool silent=true)
     {
-        SwitchTo(on, true);
+        SwitchTo(on, silent);
     }
 
-    void SwitchTo(bool on, bool reset=false)
+    void SwitchTo(bool on, bool silent=false)
     {
         isOn = on;
        
         thumb.GetComponent<Graphic>().color = on ? onToggleColor : offToggleColor;
         background.color = on ? onBackgroundColor : offBackgroundColor;
 
-        if (reset)
+        if (silent)
         {
             float x = on ? offsetX : -offsetX;
             Vector3 to = new Vector3(x, 0, 0);
@@ -70,7 +70,6 @@ public class cxUISwitchControl : MonoBehaviour
         {
             state.OnNext(isOn);
             StartCoroutine(MoveTo(thumb, on ? offsetX : -offsetX));
-
         }
     }
 

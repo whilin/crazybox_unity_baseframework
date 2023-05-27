@@ -160,11 +160,12 @@ public class cxPlayerCameraController : MonoBehaviour {
 
     void UpdateOrbit () {
         float invTime = (1.0f / Time.deltaTime);
+        Vector2 delta = Vector2.zero;
 
         if (Input.GetMouseButton (1)) {
             if (prevPostion.HasValue) {
 
-                var delta = Input.mousePosition - prevPostion.Value;
+                delta = Input.mousePosition - prevPostion.Value;
                 SetCamera (new Vector2 (delta.x, delta.y));
                 /*
                 //var delta2 = delta / Time.deltaTime;
@@ -181,6 +182,7 @@ public class cxPlayerCameraController : MonoBehaviour {
             prevPostion = null;
         }
 
+        SetCamera (new Vector2 (delta.x, delta.y));
         Vector2 scroll = Input.mouseScrollDelta;
         cameraDistance += scroll.y * invTime * distanceSpeed;
         cameraDistance = Mathf.Clamp (cameraDistance, cameraDistanceRange.x, cameraDistanceRange.y);

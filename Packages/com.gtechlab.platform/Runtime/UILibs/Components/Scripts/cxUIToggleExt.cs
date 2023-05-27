@@ -8,6 +8,17 @@ using UnityEngine.UI;
 public class cxUIToggleExt : MonoBehaviour {
     public GameObject off;
     public GameObject on;
+
+    private Toggle toggle;
+
+    public Toggle Toggle  {
+        get{
+            if(toggle == null)
+                toggle = GetComponent<Toggle>();
+            
+            return toggle;
+        }
+    }
     
     [ExecuteInEditMode()]
     void Awake () {

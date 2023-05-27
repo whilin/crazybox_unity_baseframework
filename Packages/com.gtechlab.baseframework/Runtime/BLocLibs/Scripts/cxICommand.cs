@@ -6,3 +6,8 @@ public interface cxICommand
 {
     void Execute();
 }
+
+public interface cxICommand<T>
+{
+    T Execute();
+}

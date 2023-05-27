@@ -114,7 +114,7 @@ public class cxSceneNavigator : MonoSingleton<cxSceneNavigator> {
                 (float p) => {
                     loadStatus.OnNext (new LoadStatus () {
                         status = cxLoadStatusType.Loading,
-                            progress = 0,
+                            progress = p,
                             sceneInfo = sceneInfo
                     });
                 });

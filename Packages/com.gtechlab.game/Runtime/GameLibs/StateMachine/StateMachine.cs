@@ -47,7 +47,7 @@ public class StateMachine
 	private float m_timeoutTimer = 0;
 	private float m_timeoutTime = 0;
 
-	private ArrayList m_sendMsgs;
+	private List<SendMsg> m_sendMsgs;
 
 	private object curStateParam = null;
 	private object prevStateParam = null;
@@ -61,7 +61,7 @@ public class StateMachine
 	public StateMachine(DelegateProcessStateMachine handler)
 	{
 		m_handler = handler;		
-		m_sendMsgs = new ArrayList();
+		m_sendMsgs = new List<SendMsg>();
 	}
 	
 	public bool IsCurState(int state) { return m_curState==state;}
@@ -71,6 +71,10 @@ public class StateMachine
 	{
 		m_nextState = nextState;	
 		m_nextStateParam = nextStateParam;
+	}
+
+	public void ClearDelayedMessages(){
+		m_sendMsgs.Clear();
 	}
 
 	public void SetThink(float timer)
@@ -99,20 +103,22 @@ public class StateMachine
 		m_sendMsgs.Add(msg);
 	}
 	
+	List<SendMsg> removedList = new List<SendMsg>();
 
 	//Note. 메시지 무한 루프에 빠질 위험이 있음
 	private void RouteDelayedMessage()
 	{
+		//removedList.Clear();
 		//Note, 메시지 처리
 		int i;
 		for(i=0; i < m_sendMsgs.Count ;i++)
 		{
-			SendMsg msg = m_sendMsgs[i] as SendMsg;
+			SendMsg msg = m_sendMsgs[i];
 			//msg.delay -=Time.deltaTime;
 			if(msg.delay <= 0)
 			{
 				RoundMessage(FSMMsg.OnMsg, msg.msgId, msg.msgParam);
-				m_sendMsgs.RemoveAt(i);
+				m_sendMsgs.Remove(msg);
 				i--;
 			}
 			else
