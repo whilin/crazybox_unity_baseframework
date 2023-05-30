@@ -7,6 +7,9 @@ public abstract class cxIGamePlayerBloc {
     public abstract IObservable<cxTGameDataLoadState> LoadStateAsObservable { get;}
     public abstract IObservable<TAvatarProfileModel> ProfileAsObservable { get;}
     public abstract IObservable<TAvatarEquipSetModel> AvatarEquipSetAsObservale { get;}
+    public abstract TAvatarEquipSetModel CurrentEquipSet {get;}
+    public abstract TAvatarProfileModel CurrentGameProfile {get;}
+
 
     public abstract Task<TAvatarProfileModel> GetMyPlayerProfile();
     public abstract void ChangeAvatarEquipSet(TAvatarEquipSetModel equipSet, bool preview = false);

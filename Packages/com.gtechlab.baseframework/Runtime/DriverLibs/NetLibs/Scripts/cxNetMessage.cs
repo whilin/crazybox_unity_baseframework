@@ -4,7 +4,14 @@ using UnityEngine;
 using System;
 
 [Serializable]
-public class cxNetMessage { }
+public class cxNetMessage {
+
+ }
+
+ [Serializable]
+ public class cxNetResponse : cxNetMessage {
+    public int resultCode;
+ }
 
 public enum NetRequestState
 {

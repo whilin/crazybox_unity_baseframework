@@ -30,7 +30,7 @@ public class cxDefaultSceneController : cxAbstractSceneController {
 
     async void SpwanMyPlayerObject () {
 
-        var myProfile = await cxGetIt.Get<cxIGamePlayerBloc> ().GetMyPlayerProfile ();
+        var myProfile = cxGetIt.Get<cxIGamePlayerBloc> ().CurrentGameProfile;
         var setupPrefab = await cxGetIt.Get<cxIGameItemBloc> ().LoadAvatarSetupPrefab ();
         var respawn = FindRandomRespawn ();
         if(respawn == null)

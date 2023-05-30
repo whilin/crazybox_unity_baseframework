@@ -7,10 +7,10 @@ using UnityEngine;
 public class TAvatarProfileModel
 {
     public string userKey;
-    public string userName;
+    public string nickname;
     public string greeting;
     public string photo;
-    public int gender;
+   // public int gender;
 
     public TAvatarEquipSetModel equipSet;
 }

@@ -12,6 +12,10 @@ public class cxDefaultGamePlayerBloc : cxIGamePlayerBloc {
 
     public override IObservable<TAvatarEquipSetModel> AvatarEquipSetAsObservale => throw new NotImplementedException();
 
+    public override TAvatarEquipSetModel CurrentEquipSet => myProfile.equipSet;
+
+    public override TAvatarProfileModel CurrentGameProfile => myProfile;
+
     TAvatarProfileModel myProfile;
 
     public cxDefaultGamePlayerBloc () {
@@ -27,10 +31,10 @@ public class cxDefaultGamePlayerBloc : cxIGamePlayerBloc {
             if (myProfile == null) {
                 myProfile = new TAvatarProfileModel () {
                 userKey = Guid.NewGuid ().ToString (),
-                userName = "Guest",
+                nickname = "Guest",
                 greeting = "Hello, I'm new to here",
                 photo = string.Empty,
-                gender = 0,
+                // gender = 0,
                 equipSet = new TAvatarEquipSetModel () {
 
                 }
