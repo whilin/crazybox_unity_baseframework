@@ -164,6 +164,8 @@ public class cxCachedWebContentLoader : cxSingleton<cxCachedWebContentLoader> {
                     content = ToSprite (texture);
             } else if (contentType == typeof (Texture2D)) {
                 content = await DownloadImage (url);
+            }  else if (contentType == typeof (AudioClip)) {
+                content = await DownloadAudio (url);
             } else if(contentType == typeof(VideoClip)) {
                 throw new Exception("cxCachedWebContent not support videoClip");
             } else {
@@ -207,6 +209,25 @@ public class cxCachedWebContentLoader : cxSingleton<cxCachedWebContentLoader> {
             myTexture = ((DownloadHandlerTexture) op.webRequest.downloadHandler).texture;
         else {
             Debug.LogWarning ($"cxCachedContentLoader DownloadImage failed: {url}");
+        }
+
+        return myTexture;
+    }
+
+     async Task<AudioClip> DownloadAudio (string url) {
+
+        var req = UnityWebRequest.Get (url);
+        req.downloadHandler = new DownloadHandlerAudioClip(string.Empty, AudioType.MPEG);
+
+       var op= req.SendWebRequest ();
+        await new WaitUntil (() => op.isDone);
+
+        AudioClip myTexture = null;
+
+        if (op.webRequest.result == UnityWebRequest.Result.Success)
+            myTexture = ((DownloadHandlerAudioClip) op.webRequest.downloadHandler).audioClip;
+        else {
+            Debug.LogWarning ($"cxCachedContentLoader DownloadAudio failed: {url}");
         }
 
         return myTexture;

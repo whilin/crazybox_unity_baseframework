@@ -46,6 +46,11 @@ public class cxUINetImage : MonoBehaviour {
     }
 
     void SetEmpty () {
+        if(image == null) {
+            image = GetComponent<Image> ();
+            aspectRatio = GetComponent<AspectRatioFitter> ();
+        }
+
         if (defaultImg) {
             image.color = Color.white;
             image.sprite = defaultImg;
