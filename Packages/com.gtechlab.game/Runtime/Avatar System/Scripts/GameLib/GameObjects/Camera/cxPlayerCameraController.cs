@@ -39,9 +39,21 @@ public class cxPlayerCameraController : MonoBehaviour {
         lookAtTarget = null;
     }
 
-    public void ResetCamera(){
-        transform.position = target.position - target.forward * cameraDistance;
+    public void ResetCamera () {
+        //transform.position = target.position - target.forward * cameraDistance;
+        if (followMode == CameraFollowMode.OrbitFollow) {
+
+            cameraDistance = Mathf.Clamp(cameraDistance , cameraDistanceRange.x , cameraDistanceRange.y);
+
+            var cameraView = target.forward;// target.position - transform.position);
+            var viewRot = Quaternion.LookRotation (cameraView, Vector3.up) * Quaternion.Euler (cameraOrbitX, 0, 0);
+            cameraView = viewRot * Vector3.forward;
+            var cameraPos = target.position - cameraView * cameraDistance;
+            transform.rotation = viewRot;
+            transform.position = cameraPos;
+        }
     }
+
     public void LookAt (Camera camera) {
         if (camera) {
             lookAtTarget = camera.transform;
