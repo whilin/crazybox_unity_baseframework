@@ -51,8 +51,14 @@ public class cxUIVideoPlayFrame : cxUIParameterFrame<cxUIVideoPlayFrame.FrameArg
     protected override void OnActivated (FrameArgs frameArgs) {
 
         playStartTime = 0;
-        contoller.InitPlayer ();
+        
+#if UNITY_WEBGL
+        //for WebGL Video Player를 위해..
+        contoller.volumeOn = false;
+#endif
 
+        contoller.InitPlayer ();
+        
         if(frameArgs.videoClip !=null) {
              contoller.Play(frameArgs.videoClip);
         } else if(!string.IsNullOrEmpty(frameArgs.videoURL)) {

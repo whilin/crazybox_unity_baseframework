@@ -127,11 +127,15 @@ public class cxUIVideoController : MonoBehaviour {
         aspectRatio.aspectRatio = (float)  _player.width / (float) _player.height;
 
         OnVideoReady.Invoke ();
+
+        //Note. WebGL Player 테스트 때문에 강제로!
+        ToggleVolumeControl (volumeOn);
+
         _player.Play ();
         loading.SetActive (false);
         ShowControlPanel (true);
 
-        ToggleVolumeControl (volumeOn);
+       // ToggleVolumeControl (volumeOn);
     }
 
     void _onVideoEnded (VideoPlayer vp) {
@@ -217,14 +221,20 @@ public class cxUIVideoController : MonoBehaviour {
         switch (_player.audioOutputMode) {
             case VideoAudioOutputMode.Direct:
                 _player.SetDirectAudioVolume (0, volume);
+                _player.SetDirectAudioMute(0, volume == 0 ? true: false);
+
                 break;
             case VideoAudioOutputMode.AudioSource:
                 _player.GetComponent<AudioSource> ().volume = volume;
                 _player.SetDirectAudioVolume (0, volume);
+                _player.SetDirectAudioMute(0, volume == 0 ? true: false);
+
                 break;
             default:
                 _player.GetComponent<AudioSource> ().volume = volume;
                 _player.SetDirectAudioVolume (0, volume);
+                _player.SetDirectAudioMute(0, volume == 0 ? true: false);
+
                 break;
         }
     }

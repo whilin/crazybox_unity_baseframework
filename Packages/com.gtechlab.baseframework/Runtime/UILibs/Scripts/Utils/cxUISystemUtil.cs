@@ -4,34 +4,29 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 public static class cxUISystemUtil {
-    
-    public static bool CursorLocked
-    {
+
+    public static bool CursorLocked {
         get { return Cursor.lockState == CursorLockMode.Locked; }
     }
 
-    public static void SetCursorLock(bool toLock)
-    {
+    public static void SetCursorLock (bool toLock) {
 #if UNITY_EDITOR
 
-        if (toLock)
-        {
+        if (toLock) {
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
-        }
-        else
-        {
+        } else {
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
         }
 #endif
     }
 
-	public static bool IsMousePointerOnUI(int fingerId=0)
-	{
-		EventSystem system = UnityEngine.EventSystems.EventSystem.current;
+    public static bool IsMousePointerOnUI (int fingerId = 0) {
+        EventSystem system = UnityEngine.EventSystems.EventSystem.current;
 
-		if (system != null) {
+        if (system != null) {
+            /*
 			if (Application.isMobilePlatform) {
 				if (Input.touchCount > 0) {
 					return system.IsPointerOverGameObject (fingerId);
@@ -40,7 +35,16 @@ public static class cxUISystemUtil {
 				bool overUI = system.IsPointerOverGameObject();
 				return overUI;
 			}
-		}
-		return false;
-	}
+            */
+
+            //for web
+            if (Input.touchCount > 0) {
+                fingerId = Input.GetTouch(0).fingerId;
+                return system.IsPointerOverGameObject (fingerId);
+            } else {
+                return  system.IsPointerOverGameObject();
+            }
+        }
+        return false;
+    }
 }
