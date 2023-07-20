@@ -37,15 +37,17 @@ public class cxPlayerCameraController : MonoBehaviour {
         this.target = target;
         this.followMode = followMode;
         lookAtTarget = null;
+
+        targetStopTime = 0;
     }
 
     public void ResetCamera () {
         //transform.position = target.position - target.forward * cameraDistance;
         if (followMode == CameraFollowMode.OrbitFollow) {
 
-            cameraDistance = Mathf.Clamp(cameraDistance , cameraDistanceRange.x , cameraDistanceRange.y);
+            cameraDistance = Mathf.Clamp (cameraDistance, cameraDistanceRange.x, cameraDistanceRange.y);
 
-            var cameraView = target.forward;// target.position - transform.position);
+            var cameraView = target.forward; // target.position - transform.position);
             var viewRot = Quaternion.LookRotation (cameraView, Vector3.up) * Quaternion.Euler (cameraOrbitX, 0, 0);
             cameraView = viewRot * Vector3.forward;
             var cameraPos = target.position - cameraView * cameraDistance;
@@ -54,12 +56,42 @@ public class cxPlayerCameraController : MonoBehaviour {
         }
     }
 
+    public void ResetCameraSmooth () {
+        targetStopTime = 10.0f;
+    }
+
+    void GetResetPosition (out Vector3 resetPos, out Quaternion resetRot) {
+        cameraDistance = Mathf.Clamp (cameraDistance, cameraDistanceRange.x, cameraDistanceRange.y);
+
+        var cameraView = target.forward; // target.position - transform.position);
+        var viewRot = Quaternion.LookRotation (cameraView, Vector3.up) * Quaternion.Euler (cameraOrbitX, 0, 0);
+        cameraView = viewRot * Vector3.forward;
+        var cameraPos = target.position - cameraView * cameraDistance;
+        resetRot = viewRot;
+        resetPos = cameraPos;
+    }
+
+    /*
+        IEnumerator SmoothReposition(){
+            float duration = 1.0f;
+            float n =0 ;
+            float t = Time.time;
+            do {
+                yield return null;
+                n = (Time.time - t) / duration;
+                transform.position = Vector3.SmoothDamp(transform.position, ,)
+            } while( n < 1);
+
+        }
+    */
+
     public void LookAt (Camera camera) {
         if (camera) {
             lookAtTarget = camera.transform;
             SetLookAtCamera (lookAtTarget);
         } else {
             lookAtTarget = null;
+            targetStopTime -= 2.0f;
         }
     }
 
@@ -71,6 +103,11 @@ public class cxPlayerCameraController : MonoBehaviour {
     void LateUpdate () {
         UpdateCamera (Time.deltaTime);
     }
+
+    Vector3 prevTargetPosition = Vector3.zero;
+    Vector3 prevTargetRotation = Vector3.zero;
+
+    float targetStopTime = 0;
 
     void UpdateCamera (float deltaTime) {
         if (lookAtTarget) {
@@ -127,12 +164,102 @@ public class cxPlayerCameraController : MonoBehaviour {
                 transform.rotation = Quaternion.LookRotation (cameraView, Vector3.up); //*  Quaternion.Euler(-cameraOrbitX,0,0);
             } else if (followMode == CameraFollowMode.OrbitFollow) {
 
+                /*
+                                UpdateOrbit ();
+
+                                float moveDelta = Vector3.Distance (prevTargetPosition, target.position);
+                                float rotDelta = Vector3.Distance (prevTargetRotation, target.rotation.eulerAngles);
+                                if (moveDelta < 0.0001f && rotDelta < 0.0001f) {
+                                    // if (targetStopTime == 0) targetStopTime = Time.time;
+                                    targetStopTime += Time.deltaTime;
+                                } else {
+                                    targetStopTime = 0;
+                                }
+
+                                var cameraView = (target.position - transform.position);
+                                cameraView.y = 0;
+                                cameraView.Normalize ();
+                                var viewRot = Quaternion.LookRotation (cameraView, Vector3.up) * Quaternion.Euler (cameraOrbitX, 0, 0);
+                                cameraView = viewRot * Vector3.forward;
+
+                                var cameraPos = target.position - cameraView * cameraDistance;
+
+                                int layer = cameraCollisionMask.value; // 1 << LayerMask.NameToLayer ("Default");
+                                float smoothTime = 0.0f;
+
+                                var physicsScene = target.gameObject.scene.GetPhysicsScene ();
+                                if (physicsScene.SphereCast (target.position, cameraSphereRadius, -cameraView, out RaycastHit hit, cameraDistance, layer)) {
+                                    cameraPos = hit.point + cameraView * cameraSphereRadius;
+                                }
+
+                                //Note. 이종옥, 기능 제거 
+                                // if (Input.GetKeyDown (KeyCode.T)) {
+                                //     cameraDistanceRange = new Vector2 (0f, 0f);
+                                // } else if (Input.GetKeyDown (KeyCode.U)) {
+                                //     cameraDistanceRange = new Vector2 (1.0f, 5.0f);
+                                // }
+
+                                transform.rotation = viewRot; // Quaternion.LookRotation(cameraView, Vector3.up);
+                                transform.position = cameraPos;
+
+                                if ((targetStopTime) > 0.1f) {
+
+                                    GetResetPosition (out Vector3 resetPos, out Quaternion resetRot);
+
+                                    Vector3 currentVel = Vector3.zero;
+                                    float smoothResetTime = 20.0f;
+                                    transform.position = Vector3.SmoothDamp (transform.position, resetPos, ref currentVel, smoothResetTime * Time.deltaTime, float.MaxValue);
+                                    //transform.rotation = Quaternion.Lerp()
+                                }
+
+                                prevTargetPosition = target.position;
+                                prevTargetRotation = target.rotation.eulerAngles;
+                            }
+                    */
+
                 UpdateOrbit ();
 
-                var cameraView = (target.position - transform.position);
-                cameraView.y = 0;
-                cameraView.Normalize ();
-                var viewRot = Quaternion.LookRotation (cameraView, Vector3.up) * Quaternion.Euler (cameraOrbitX, 0, 0);
+                float moveDelta = Vector3.Distance (prevTargetPosition, target.position);
+                float rotDelta = Vector3.Distance (prevTargetRotation, target.rotation.eulerAngles);
+                if (moveDelta < 0.0001f && rotDelta < 0.0001f) {
+                    // if (targetStopTime == 0) targetStopTime = Time.time;
+                    targetStopTime += Time.deltaTime;
+                } else {
+                    targetStopTime = 0;
+                }
+
+                Vector3 cameraView = Vector3.zero;
+                Quaternion viewRot = Quaternion.identity;
+
+                if ((targetStopTime) > 0.1f) {
+
+                    GetResetPosition (out Vector3 resetPos, out Quaternion resetRot);
+
+                    // Vector3 currentVel = Vector3.zero;
+                    // float smoothResetTime = 20.0f;
+                    // var viewRotEular = Vector3.SmoothDamp (transform.rotation.eulerAngles, resetRot.eulerAngles, ref currentVel, smoothResetTime * Time.deltaTime, float.MaxValue);
+
+                    float n = (targetStopTime - 0.1f) / 5.0f;
+                    float t = n * n * n;
+
+                    var curRot = transform.rotation.eulerAngles;
+                    var targetRot = resetRot.eulerAngles;
+                    Vector3 viewRotEular = Vector3.zero;
+
+                    viewRotEular.x = Mathf.LerpAngle (curRot.x, targetRot.x, t);
+                    viewRotEular.y = Mathf.LerpAngle (curRot.y, targetRot.y, t);
+                    viewRotEular.z = Mathf.LerpAngle (curRot.z, targetRot.z, t);
+
+                    viewRot = Quaternion.Euler (viewRotEular);
+                } else {
+
+                    cameraView = (target.position - transform.position);
+                    cameraView.y = 0;
+                    cameraView.Normalize ();
+
+                    viewRot = Quaternion.LookRotation (cameraView, Vector3.up) * Quaternion.Euler (cameraOrbitX, 0, 0);
+                }
+
                 cameraView = viewRot * Vector3.forward;
 
                 var cameraPos = target.position - cameraView * cameraDistance;
@@ -145,16 +272,11 @@ public class cxPlayerCameraController : MonoBehaviour {
                     cameraPos = hit.point + cameraView * cameraSphereRadius;
                 }
 
-                //Note. 이종옥, 기능 제거 
-                // if (Input.GetKeyDown (KeyCode.T)) {
-                //     cameraDistanceRange = new Vector2 (0f, 0f);
-                // } else if (Input.GetKeyDown (KeyCode.U)) {
-                //     cameraDistanceRange = new Vector2 (1.0f, 5.0f);
-                // }
-
-                transform.rotation = viewRot; // Quaternion.LookRotation(cameraView, Vector3.up);
+                transform.rotation = viewRot;
                 transform.position = cameraPos;
 
+                prevTargetPosition = target.position;
+                prevTargetRotation = target.rotation.eulerAngles;
             }
         }
     }
