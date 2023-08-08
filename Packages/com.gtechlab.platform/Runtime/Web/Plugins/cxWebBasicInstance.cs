@@ -37,7 +37,10 @@ public class cxWebBasicInstance : MonoBehaviour {
     private static extern string setCookie (string cname, string cvalue, int expireDays);
 
     [DllImport ("__Internal")]
-    private static extern void isMobilePlatform ();
+    private static extern bool isMobileDevice ();
+
+    [DllImport ("__Internal")]
+    public static extern bool isIPhoneDevice ();
 
     [DllImport ("__Internal")]
     private static extern void installEventCallback ();
@@ -77,6 +80,23 @@ public class cxWebBasicInstance : MonoBehaviour {
 #if UNITY_WEBGL && !UNITY_EDITOR
         closeWindow ();
 #endif
+    }
+
+
+    public static bool IsMobileDevice(){
+        #if UNITY_WEBGL && !UNITY_EDITOR
+            return isMobileDevice();
+        #else
+            return false;
+        #endif
+    }
+
+    public static bool IsIPhoneDevice(){
+          #if UNITY_WEBGL && !UNITY_EDITOR
+            return isIPhoneDevice();
+        #else
+            return false;
+        #endif
     }
 
     public static string GetCookie (string cname) {

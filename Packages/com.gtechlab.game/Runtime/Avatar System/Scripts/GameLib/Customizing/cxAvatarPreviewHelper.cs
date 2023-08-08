@@ -2,14 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class cxAvatarPreviewHelper : MonoBehaviour
 {
     #if UNITY_EDITOR
     public List<GameObject> previewParts;
 
     [ContextMenu("Build")]
-    void Build(){
+    public void Build(){
         cxAvatarMeshAssembly.ClearSkinnedMeshs(gameObject);
         cxAvatarMeshAssembly.AssemblyAvatar(gameObject, previewParts);
     }
@@ -18,6 +17,6 @@ public class cxAvatarPreviewHelper : MonoBehaviour
     void Clear(){
         cxAvatarMeshAssembly.ClearSkinnedMeshs(gameObject);
     }
-    
+
     #endif
 }

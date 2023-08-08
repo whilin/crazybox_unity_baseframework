@@ -12,9 +12,11 @@ public enum ItemType {
 }
 
 public enum ItemFlag {
-    Undef = 0,
-    New = 1,
-    Hot = 2,
+    Unused = -1,
+    Normal = 0, //Disable 
+    FreeUse = 1,
+    
+    InitUse = 11,
 }
 
 public abstract class TBaseItemDescModel {
