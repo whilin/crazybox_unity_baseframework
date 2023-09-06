@@ -139,9 +139,10 @@ public class cxUIVideoController : MonoBehaviour {
     }
 
     void _onVideoEnded (VideoPlayer vp) {
-        _player.Stop ();
-
-        OnVideoFinished.Invoke ();
+        if(!vp.isLooping) {
+            _player.Stop ();
+            OnVideoFinished.Invoke ();
+        }
     }
 
     void _onVideoSeekCompleted (VideoPlayer vp) {
@@ -172,19 +173,21 @@ public class cxUIVideoController : MonoBehaviour {
         HideControlPanel ();
     }
 
-    public void Play (string url) {
+    public void Play (string url, bool loop=false) {
         if (cxResourceNaming.IsHttp (url)) {
             _player.url = url;
+            _player.isLooping = loop;
             _player.Play ();
         } else if (cxResourceNaming.IsStreaming (url, out string path)) {
             _player.url = cxResourceNaming.ToAppStreamingPath (path);
+            _player.isLooping = loop;
             _player.Play ();
         } else {
             LoadVideoClipPlay (url);
         }
     }
 
-    async void LoadVideoClipPlay (string resourceURL) {
+    async void LoadVideoClipPlay (string resourceURL,bool loop=false) {
 
         try {
             var videoClip = await cxUniversalResourceLoader.Instance.LoadAsset<VideoClip> (resourceURL);
@@ -193,7 +196,7 @@ public class cxUIVideoController : MonoBehaviour {
                 throw new Exception ("Video resource not found");
 
             if (videoClip)
-                Play (videoClip);
+                Play (videoClip, loop);
 
         } catch (Exception ex) {
             Debug.LogException (ex);
@@ -202,8 +205,9 @@ public class cxUIVideoController : MonoBehaviour {
         }
     }
 
-    public void Play (VideoClip videoClip) {
+    public void Play (VideoClip videoClip,bool loop=false) {
         _player.clip = videoClip;
+        _player.isLooping = loop;
         _player.Play ();
     }
 
