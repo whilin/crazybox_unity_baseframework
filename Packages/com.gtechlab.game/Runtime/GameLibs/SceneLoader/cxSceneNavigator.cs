@@ -35,7 +35,8 @@ public class cxSceneNavigator : MonoSingleton<cxSceneNavigator> {
     public IObservable<LoadStatus> LoadStatusAsObservable => loadStatus.AsObservable ();
     public LoadStatus LoadStatusInfo => loadStatus.Value;
     public Scene? ActiveScene => activeScene;
-    
+    public object SceneInfo => sceneInfo;
+
 
     protected override void Awake () {
         base.Awake();
