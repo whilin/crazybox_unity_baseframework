@@ -19,6 +19,13 @@ public class cxUIVideoController : MonoBehaviour {
         Seeking,
     }
 
+    [Header ("Play Default Property")]
+    public bool hideControlPanelAtPlay = false;
+    public bool disableControlPanel = false;
+    public bool volumeOn = false; //Note. 시작시 볼륨 on/off 컨트롤 가능
+
+
+    [Header ("video Panel")]
     public VideoPlayer _player;
     public RawImage _playerRenderer;
     public AspectRatioFitter aspectRatio;
@@ -46,9 +53,7 @@ public class cxUIVideoController : MonoBehaviour {
     public GameObject errorPanel;
     public Text errorText;
 
-    [Header ("Default Volume State")]
-    public bool volumeOn = false; //Note. 시작시 볼륨 on/off 컨트롤 가능
-
+    
     //private bool showPlayerControl = false;
     ReactiveProperty<bool> showPlayerControl = new ReactiveProperty<bool> (false);
     public IObservable<bool> ShowPlayerControlAsObservable => showPlayerControl.AsObservable ();
@@ -90,12 +95,12 @@ public class cxUIVideoController : MonoBehaviour {
         });
 
         touchDelegator.onPointerClick.AddListener (() => {
-            if (showPlayerControl.Value)
-                HideControlPanel ();
-            else
-                ShowControlPanel (true);
-
-            // ShowControlPanel (true);
+            if(!disableControlPanel) {
+                if (showPlayerControl.Value)
+                    HideControlPanel ();
+                else
+                    ShowControlPanel (true);
+            }
         });
 
         volumeOnButton.onClick.AddListener (() => {
@@ -133,9 +138,11 @@ public class cxUIVideoController : MonoBehaviour {
 
         _player.Play ();
         loading.SetActive (false);
-        ShowControlPanel (true);
 
-       // ToggleVolumeControl (volumeOn);
+        if(hideControlPanelAtPlay)
+            HideControlPanel();
+        else
+            ShowControlPanel (true);
     }
 
     void _onVideoEnded (VideoPlayer vp) {
@@ -275,6 +282,10 @@ public class cxUIVideoController : MonoBehaviour {
     }
 
     public void ShowControlPanel (bool autoHide = false) {
+        if(disableControlPanel) {
+            return;
+        }
+        
         if (!showPlayerControl.Value) {
             controlPanel.Play ();
             showPlayerControl.Value = true;
