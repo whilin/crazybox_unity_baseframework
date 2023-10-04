@@ -175,7 +175,9 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
     public void PlayEmotion (EmotionCode emoId) {
         stateMachine.SendMessage ((int) MsgID.PlayEmotion, emoId, 0);
     }
-
+    public void PlayEmotion (string motionName) {
+        stateMachine.SendMessage ((int) MsgID.PlayEmotion2, motionName, 0);
+    }
     public void PlayLookAt (cxTrigger trigger) {
         stateMachine.SendMessage ((int) MsgID.LookAt, trigger, 0);
     }
@@ -200,6 +202,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         MoveTo,
         WarpTo,
         Jump,
+        PlayEmotion2
     }
 
     private enum MsgID {
@@ -212,20 +215,24 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         ArrivedTo,
         EndOnceMotion,
         WarpTo,
-        Landed
+        Landed,
+        PlayEmotion2
     }
 
     private StateMachine stateMachine;
 
-    readonly int _animStateStandToSit = Animator.StringToHash ("StandToSit");
-    readonly int _animStateSitting = Animator.StringToHash ("Sitting");
-    readonly int _animStateCrying = Animator.StringToHash ("Crying");
-    readonly int _animStateHandRaising = Animator.StringToHash ("HandRaising");
+    //기본 이동
     readonly int _animStateIdleWalking = Animator.StringToHash ("Idle Walk Run Blend");
     readonly int _amimStateJump = Animator.StringToHash ("JumpStart");
     readonly int _amimStateInAir = Animator.StringToHash ("InAir");
     readonly int _amimStateJumpLand = Animator.StringToHash ("JumpLand");
 
+    readonly int _animStateStandToSit = Animator.StringToHash ("StandToSit");
+    readonly int _animStateSitting = Animator.StringToHash ("Sitting");
+
+    //Expression
+    readonly int _animStateCrying = Animator.StringToHash ("Crying");
+    readonly int _animStateHandRaising = Animator.StringToHash ("HandRaising");
     readonly int _animStateAngry = Animator.StringToHash ("Angry");
     readonly int _animStateHappy = Animator.StringToHash ("Happy");
     readonly int _animStateFrustration = Animator.StringToHash ("Frustration");
@@ -233,6 +240,9 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
     readonly int _animStateClap = Animator.StringToHash ("Clap");
     readonly int _animStateGreeting = Animator.StringToHash ("Greeting");
     readonly int _animStateSupriesed = Animator.StringToHash ("Supriesed");
+
+    readonly int _animStateStandingAction = Animator.StringToHash ("StandingAction");
+    readonly int _animStateCrouchAction = Animator.StringToHash ("CrouchAction");
 
     //Trigger ID
     readonly int _animIDSpeed = Animator.StringToHash ("Speed");
@@ -291,7 +301,9 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
                 s.StateInfo.shortNameHash == _animStateLaugh ||
                 s.StateInfo.shortNameHash == _animStateClap ||
                 s.StateInfo.shortNameHash == _animStateGreeting ||
-                s.StateInfo.shortNameHash == _animStateSupriesed
+                s.StateInfo.shortNameHash == _animStateSupriesed ||
+                s.StateInfo.shortNameHash == _animStateStandingAction ||
+                s.StateInfo.shortNameHash == _animStateCrouchAction
             )
             .DoOnCompleted (() => {
                 Debug.Log ("OnStateExitAsObservable DoOnCompleted");
@@ -386,7 +398,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
                 if (ENTER ()) {
                     directMoveController.enabled = true;
                     naviAgentMoveController.enabled = false;
-                //    playerObject.ExecuteSpawn (playerObject);
+                    //    playerObject.ExecuteSpawn (playerObject);
                 } else if (EXIT ()) {
 
                 } else if (UPDATE ()) {
@@ -406,6 +418,9 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
                     return true;
                 } else if (MSG (MsgID.PlayEmotion)) {
                     SET_STATE (StateID.PlayEmotion, PARAM ());
+                    return true;
+                } else if (MSG (MsgID.PlayEmotion2)) {
+                    SET_STATE (StateID.PlayEmotion2, PARAM ());
                     return true;
                 } else if (MSG (MsgID.MoveTo)) {
                     SET_STATE (StateID.MoveTo, PARAM ());
@@ -544,6 +559,34 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
                 } else if (MSG (MsgID.EndOnceMotion)) {
                     SET_STATE (StateID.Default);
                 }
+            } else if (STATE (StateID.PlayEmotion2)) {
+                if (ENTER ()) {
+                    //Release LookAt
+                    _ReleaseLookAtState ();
+
+                    string motionName = (string) PARAM ();
+                    int motionHash = Animator.StringToHash (motionName);
+
+                    animator.Play (motionHash);
+
+                    var _stateMachineObservables = animator.GetBehaviour<ObservableStateMachineTrigger> ();
+                    _stateMachineObservables.OnStateExitAsObservable ()
+                        .Where (s => s.StateInfo.shortNameHash == motionHash)
+                        .Take (1)
+                        .Subscribe (s => {
+                            Debug.Log ("PlayEmotion2 _stateMachineObservables PlayEmotion2 exit:" + s.StateInfo.shortNameHash);
+                            stateMachine.SendMessage ((int) MsgID.EndOnceMotion, s.StateInfo.shortNameHash, 0);
+                            isAnimatorPlay = false;
+                        });
+
+                } else if (UPDATE ()) {
+
+                    //TODO : Exit Time 어떻게 찾아야하지!!
+                    // if (playerController.output.exitOnceMotion)
+                    //     SET_STATE (StateID.Default);
+                } else if (MSG (MsgID.EndOnceMotion)) {
+                    SET_STATE (StateID.Default);
+                }
             } else if (STATE (StateID.Global)) {
                 if (UPDATE ()) {
                     // playerController.output.Consumed ();
@@ -554,7 +597,7 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
         });
 
         stateMachine.SetState ((int) StateID.Default);
-        playerObject.ExecuteSpawn(playerObject);
+        playerObject.ExecuteSpawn (playerObject);
     }
 
     IEnumerator WaitSetPosition (Transform point) {
@@ -562,9 +605,9 @@ public sealed class cxAvatarLocalStateController : MonoBehaviour {
 
         transform.rotation = point.rotation;
         transform.position = point.position;
-        
-         var playerCamera = cxAbstractSceneController.Instance.GetPlayerCamera ();
-         playerCamera.ResetCamera();
+
+        var playerCamera = cxAbstractSceneController.Instance.GetPlayerCamera ();
+        playerCamera.ResetCamera ();
     }
 
     IEnumerator WaitSetRotation (cxTrigger trigger) {
