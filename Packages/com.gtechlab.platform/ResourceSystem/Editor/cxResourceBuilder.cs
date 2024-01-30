@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -54,7 +55,7 @@ public abstract class cxResourceBuilder {
         }
     }
 
-     [MenuItem ("Tools/G-Tech Lab/Build All Resource Bundle(No Upload)")]
+    [MenuItem ("Tools/G-Tech Lab/Build All Resource Bundle(No Upload)")]
     public static void BuildAllResourceNoUpload () {
         try {
             var defs = AssetDatabase.FindAssets ("t:cxResourceDefinition");
@@ -75,6 +76,48 @@ public abstract class cxResourceBuilder {
         } catch (Exception ex) {
             Debug.LogError (ex);
             cxEditorWindowUtils.ShowErrorMessage ("Build All Resource Bundle", ex.Message);
+        }
+    }
+
+    [MenuItem ("Assets/G-Tech Lab/Build Resource(Path)", true, 0)]
+    public static bool BuildResourceForPathValid () {
+        if (Selection.activeObject != null) {
+            string path = AssetDatabase.GetAssetPath (Selection.activeObject);
+            return !string.IsNullOrEmpty (path);
+        }
+
+        return false;
+    }
+
+    [MenuItem ("Assets/G-Tech Lab/Build Resource(Path)", false, 0)]
+    public static void BuildResourceForPath () {
+        try {
+            string resourcePath;
+
+            if (Selection.activeObject != null); {
+                resourcePath = AssetDatabase.GetAssetPath (Selection.activeObject);
+            }
+
+            var defs = AssetDatabase.FindAssets ("t:cxResourceDefinition", new string[] { resourcePath});
+
+             Debug.Log($"Find {defs.Length} resources");
+
+            List<cxResourceDescModel> list = new List<cxResourceDescModel> ();
+
+            foreach (var guid in defs) {
+                var path = AssetDatabase.GUIDToAssetPath (guid);
+                var def = AssetDatabase.LoadAssetAtPath<cxResourceDefinition> (path);
+                var desc = BuildResource (def);
+                list.Add (desc);
+            }
+
+            foreach (var desc in list) {
+                BuildPackage (desc);
+            }
+
+        } catch (Exception ex) {
+            Debug.LogError (ex);
+            cxEditorWindowUtils.ShowErrorMessage ("Build Resource(Path) Bundle", ex.Message);
         }
     }
 
