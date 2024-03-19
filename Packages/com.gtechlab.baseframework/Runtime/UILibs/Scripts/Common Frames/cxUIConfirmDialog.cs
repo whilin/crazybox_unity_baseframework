@@ -13,8 +13,10 @@ public class cxUIConfirmDialog : cxUIFrame {
         public string title;
         public string message;
         public MethodCall method;
-    }
 
+        public string confirmText = "OK";
+        public string cancelText = "Cancel";
+    }
 
     [System.Serializable]
     public class UIWidget {
@@ -35,17 +37,25 @@ public class cxUIConfirmDialog : cxUIFrame {
 
         m_widget.cancelButton.OnClickAsObservable ().Subscribe (s => {
             m?.Invoke (false);
-            PopResult(false);
+            PopResult (false);
         }).AddTo (this);
     }
 
     protected override void OnActivated (object showParam) {
         var param = showParam as ShowParam;
-        if (param != null)
-        {
+        if (param != null) {
             m_widget.title.text = param.title;
             m_widget.message.text = param.message;
             m = param.method;
+
+            m_widget.submitButton.GetComponentInChildren<Text> ().text = param.confirmText;
+
+            if (!string.IsNullOrEmpty (param.cancelText)) {
+                m_widget.cancelButton.gameObject.SetActive (true);
+                m_widget.cancelButton.GetComponentInChildren<Text> ().text = param.cancelText;
+            } else {
+                m_widget.cancelButton.gameObject.SetActive (false);
+            }
         }
     }
 
