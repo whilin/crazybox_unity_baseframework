@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -186,9 +187,19 @@ public class cxUIVideoController : MonoBehaviour {
             _player.isLooping = loop;
             _player.Play ();
         } else if (cxResourceNaming.IsStreaming (url, out string path)) {
-            _player.url = cxResourceNaming.ToAppStreamingPath (path);
+            //Note. cannot read file error on ios file:///...
+
+// #if UNITY_EDITOR
+//              _player.url = cxResourceNaming.ToAppStreamingPath (path);
+// #else
+//             _player.url =  Path.Combine (Application.streamingAssetsPath, path);
+// #endif
+            _player.url =  Path.Combine (Application.streamingAssetsPath, path);
+
             _player.isLooping = loop;
             _player.Play ();
+
+            Debug.Log ("Play Streaming Video:" + _player.url);
         } else {
             LoadVideoClipPlay (url);
         }

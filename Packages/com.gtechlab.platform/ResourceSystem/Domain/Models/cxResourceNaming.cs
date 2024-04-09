@@ -100,6 +100,7 @@ public static class cxResourceNaming {
 #elif UNITY_IOS
         newPath = "file://" + newPath;
 #endif
+
         return newPath;
     }
 }

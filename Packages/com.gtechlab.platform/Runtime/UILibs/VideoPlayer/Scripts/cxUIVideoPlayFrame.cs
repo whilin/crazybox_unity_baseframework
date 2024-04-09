@@ -13,6 +13,7 @@ public class cxUIVideoPlayFrame : cxUIParameterFrame<cxUIVideoPlayFrame.FrameArg
         public VideoClip videoClip;
         public string videoURL;
         public string tipMessage;
+        public int requiredPlayTime;
     }
 
     public Button closeButton;
@@ -29,8 +30,9 @@ public class cxUIVideoPlayFrame : cxUIParameterFrame<cxUIVideoPlayFrame.FrameArg
 
     protected override void OnInit () {
         closeButton.onClick.AddListener (() => {
-            int playTime = playStartTime > 0 ? Mathf.CeilToInt (Time.realtimeSinceStartup - playStartTime) : 0;
-            PopResult (playTime);
+            // int playTime = playStartTime > 0 ? Mathf.CeilToInt (Time.realtimeSinceStartup - playStartTime) : 0;
+            // PopResult (playTime);
+            CloseByUser();
         });
 
         contoller.OnVideoReady.AddListener (() => {
@@ -84,5 +86,34 @@ public class cxUIVideoPlayFrame : cxUIParameterFrame<cxUIVideoPlayFrame.FrameArg
 
         yield return new WaitForSeconds (tipMessageTime);
         tipMessagePanel.SetActive (false);
+    }
+
+    void CloseByUser () {
+        int playTime = playStartTime > 0 ? Mathf.CeilToInt (Time.realtimeSinceStartup - playStartTime) : 0;
+        if(frameArgs.requiredPlayTime > 0 && playTime < frameArgs.requiredPlayTime) {
+            ShowCaution(playTime);
+        } else {
+            PopResult (playTime);
+        }
+    }
+     void ShowCaution (int playTime) {
+           cxUIConfirmDialog.ShowParam param = new cxUIConfirmDialog.ShowParam () {
+                title = "Caution",
+                message = "You have not watched the video for the required time. Do you want to continue?",
+                confirmText = "Continue",
+                cancelText = "Quit"
+            };
+
+            contoller.Pause();
+
+            cxUINavigator.Instance.ShowDialog<cxUIConfirmDialog> (param).OnCloseOnceAsObservale.Subscribe (
+                (result) => {
+                    if (result != null && (bool) result) {
+                        contoller.Play();
+                    } else {
+                         PopResult (playTime);
+                    }
+                }
+            );
     }
 }
