@@ -9,7 +9,8 @@ public enum cxStartUpEnvId {
     Editor,
     DEV,
     BETA,
-    RELEASE  
+    RELEASE  ,
+    REVIEW
 }
 
 
@@ -53,7 +54,7 @@ public class cxStartupEnvTable : ScriptableObject {
     }
 
 
-#if UNITY_EDITOR
+
     public static void SetActiveSetting(cxStartUpEnvId settingId){
         var table = Resources.Load<cxStartupEnvTable> (TableName);
 
@@ -68,10 +69,11 @@ public class cxStartupEnvTable : ScriptableObject {
         } else {
             throw new Exception("cxAppStartupEnvironment Setting not found:"+settingId);
         }
-
+#if UNITY_EDITOR
         EditorUtility.SetDirty(table);
         AssetDatabase.SaveAssets();
-    }
 #endif
+    }
+
 
 }

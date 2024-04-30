@@ -12,5 +12,8 @@
     "name": "Grayson.Lee",
     "email": "e.jongok@gmail.com",
     "url": ""
+  },
+  "dependencies": {
+    "com.unity.textmeshpro": "3.0.6"
   }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -12,6 +13,7 @@ public class cxUIConfirmDialog : cxUIFrame {
     public class ShowParam {
         public string title;
         public string message;
+
         public MethodCall method;
 
         public string confirmText = "OK";
@@ -22,8 +24,14 @@ public class cxUIConfirmDialog : cxUIFrame {
     public class UIWidget {
         public Button submitButton;
         public Button cancelButton;
+
+#if TMP_PRO
+        public TMP_Text title;
+        public TMP_Text message;
+#else
         public Text title;
         public Text message;
+#endif
     }
 
     public UIWidget m_widget;
@@ -44,15 +52,19 @@ public class cxUIConfirmDialog : cxUIFrame {
     protected override void OnActivated (object showParam) {
         var param = showParam as ShowParam;
         if (param != null) {
+
             m_widget.title.text = param.title;
             m_widget.message.text = param.message;
+
             m = param.method;
 
-            m_widget.submitButton.GetComponentInChildren<Text> ().text = param.confirmText;
+            // m_widget.submitButton.GetComponentInChildren<Text> ().text = param.confirmText;
+            m_widget.submitButton.SetLabel(param.confirmText);
 
             if (!string.IsNullOrEmpty (param.cancelText)) {
                 m_widget.cancelButton.gameObject.SetActive (true);
-                m_widget.cancelButton.GetComponentInChildren<Text> ().text = param.cancelText;
+                m_widget.cancelButton.SetLabel(param.cancelText);
+                // m_widget.cancelButton.GetComponentInChildren<Text> ().text = param.cancelText;
             } else {
                 m_widget.cancelButton.gameObject.SetActive (false);
             }
