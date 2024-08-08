@@ -74,6 +74,8 @@ public class TweenUtil
     private bool m_on = false;
     private float m_triggerTime;
 
+    private bool use_realtime = false;
+
     public bool On { get { return m_on; } }
 
     //private float m_remainedCycleTime;
@@ -82,21 +84,32 @@ public class TweenUtil
     {
 
     }
-
-    public TweenUtil(float cycleTime, int cycleRepeat = 1, TweenLoopType loopType = TweenLoopType.Loop)
+     public TweenUtil(float cycleTime,  bool use_realtime)
     {
-        m_loopType = loopType;
+        m_loopType = TweenLoopType.Loop;
         m_cycleTime = cycleTime;
-        m_cycleRepeat = cycleRepeat;
+        m_cycleRepeat = 1;
+        this.use_realtime = use_realtime;
 
         Trigger(false);
     }
 
-    public void SetTweener(float cycleTime, int cycleRepeat = 1, TweenLoopType loopType = TweenLoopType.Loop)
+    public TweenUtil(float cycleTime, int cycleRepeat = 1, TweenLoopType loopType = TweenLoopType.Loop, bool use_realtime=false)
     {
         m_loopType = loopType;
         m_cycleTime = cycleTime;
         m_cycleRepeat = cycleRepeat;
+        this.use_realtime = use_realtime;
+
+        Trigger(false);
+    }
+
+    public void SetTweener(float cycleTime, int cycleRepeat = 1, TweenLoopType loopType = TweenLoopType.Loop,bool use_realtime=false)
+    {
+        m_loopType = loopType;
+        m_cycleTime = cycleTime;
+        m_cycleRepeat = cycleRepeat;
+        this.use_realtime = use_realtime;
     }
 
     public void Trigger(bool on = true)
@@ -187,7 +200,7 @@ public class TweenUtil
 
         if (m_on)
         {
-            float curTime = Time.time;
+            float curTime = use_realtime ? Time.realtimeSinceStartup : Time.time;
             float elapsedTime = curTime - m_triggerTime;
 
             int curCycle = (int)(elapsedTime / m_cycleTime) + 1;

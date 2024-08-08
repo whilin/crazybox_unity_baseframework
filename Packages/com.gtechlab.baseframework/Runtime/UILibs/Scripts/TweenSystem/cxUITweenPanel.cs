@@ -39,6 +39,7 @@ public class cxUITweenPanel: MonoBehaviour {
     public bool m_auto = false; 
 
     public bool ignore_reset_pos_scale = false;
+    public bool use_realtime = false;
 
     public UIEffectParam m_param;
     public UIEffectParam m_hideParam;
@@ -121,7 +122,7 @@ public class cxUITweenPanel: MonoBehaviour {
         if(imm)
             gameObject.SetActive(true);
         else
-		   m_activeFxCo = PlayUIEffect(rectTransform, m_param, m_param.delay, initPosition, initScale, initPanel);
+		   m_activeFxCo = PlayUIEffect(rectTransform, m_param, m_param.delay, initPosition, initScale, initPanel, use_realtime);
     }
 
     public void Play(float delay)
@@ -138,7 +139,7 @@ public class cxUITweenPanel: MonoBehaviour {
 	    	rectTransform.anchoredPosition3D = initPosition;
         }
 
-		m_activeFxCo = PlayUIEffect(rectTransform, m_param, delay, initPosition, initScale, initPanel);
+		m_activeFxCo = PlayUIEffect(rectTransform, m_param, delay, initPosition, initScale, initPanel, use_realtime);
     }
 
 
@@ -155,7 +156,7 @@ public class cxUITweenPanel: MonoBehaviour {
 	    	rectTransform.localPosition = initPosition;
         }
         
-       m_activeFxCo = PlayUIEffect(rectTransform, param, param.delay, initPosition, initScale, initPanel);
+       m_activeFxCo = PlayUIEffect(rectTransform, param, param.delay, initPosition, initScale, initPanel, use_realtime);
     }
 
     [ContextMenu("Hide")]
@@ -175,7 +176,7 @@ public class cxUITweenPanel: MonoBehaviour {
         if(imm)
             gameObject.SetActive(false);
         else
-            m_activeFxCo=  HideUIEffect(rectTransform, m_hideParam, m_param.delay, initPosition, initScale, initPanel);
+            m_activeFxCo=  HideUIEffect(rectTransform, m_hideParam, m_param.delay, initPosition, initScale, initPanel, use_realtime);
     }
 	
 	// public void Hide(float delayTime)
@@ -211,7 +212,7 @@ public class cxUITweenPanel: MonoBehaviour {
     }
 	IEnumerator CoScheduledHide(float delayTime)
 	{
-		yield return new WaitForSeconds(delayTime);
+		yield return use_realtime ? new WaitForSecondsRealtime(delayTime) : new WaitForSeconds(delayTime);
 		Hide();
 	}
 
@@ -234,7 +235,7 @@ public class cxUITweenPanel: MonoBehaviour {
 
     public static void Play(RectTransform obj, UIEffectParam param, float delay = 0.0f)
     {
-        PlayUIEffect(obj, param, delay, Vector3.zero, Vector3.one,null);
+        PlayUIEffect(obj, param, delay, Vector3.zero, Vector3.one,null, false);
     }
 
     /***************************************************************
@@ -249,7 +250,7 @@ public class cxUITweenPanel: MonoBehaviour {
      * 
      * *************************************************************/
     private static Coroutine PlayUIEffect(RectTransform rectT, UIEffectParam param, float delay, 
-                                        Vector3 initPosition, Vector3 initScale, CanvasGroup initPanel)
+                                        Vector3 initPosition, Vector3 initScale, CanvasGroup initPanel, bool use_realtime)
     {
         if (delay == 0)
             rectT.gameObject.SetActive(true);
@@ -258,47 +259,47 @@ public class cxUITweenPanel: MonoBehaviour {
         {
             case UITweenType.ShowFromLeft:
                 {
-                   return cxUITweenHelper.ShowFrom(cxUITweenHelper.MovingDir.Left, rectT, initPosition, delay, param.tfunc, param.duration);
+                   return cxUITweenHelper.ShowFrom(cxUITweenHelper.MovingDir.Left, rectT, initPosition, delay, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowFromRight:
                 {
-                   return cxUITweenHelper.ShowFrom(cxUITweenHelper.MovingDir.Right, rectT, initPosition, delay, param.tfunc, param.duration);
+                   return cxUITweenHelper.ShowFrom(cxUITweenHelper.MovingDir.Right, rectT, initPosition, delay, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowFromUp:
                 {
-                  return  cxUITweenHelper.ShowFrom(cxUITweenHelper.MovingDir.Up, rectT, initPosition, delay, param.tfunc, param.duration);
+                  return  cxUITweenHelper.ShowFrom(cxUITweenHelper.MovingDir.Up, rectT, initPosition, delay, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowFromDown:
                 {
-                   return cxUITweenHelper.ShowFrom(cxUITweenHelper.MovingDir.Down, rectT, initPosition, delay, param.tfunc, param.duration);
+                   return cxUITweenHelper.ShowFrom(cxUITweenHelper.MovingDir.Down, rectT, initPosition, delay, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowScaleX:
                 {
-                   return cxUITweenHelper.ShowScale(rectT.gameObject, true, delay, true, false, param.tfunc, param.duration);
+                   return cxUITweenHelper.ShowScale(rectT.gameObject, true, delay, true, false, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowScaleY:
                 {
-                   return cxUITweenHelper.ShowScale(rectT.gameObject, true, delay, false, true, param.tfunc, param.duration);
+                   return cxUITweenHelper.ShowScale(rectT.gameObject, true, delay, false, true, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowScaleXY:
                 {
-                    return cxUITweenHelper.ShowScale(rectT.gameObject, true, delay, true, true, param.tfunc, param.duration);
+                    return cxUITweenHelper.ShowScale(rectT.gameObject, true, delay, true, true, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowStamp:
                 {
-                   return cxUITweenHelper.Stamp(rectT, delay, initScale, param.tfunc, param.duration);
+                   return cxUITweenHelper.Stamp(rectT, delay, initScale, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowAlpha:
                 {
-                   return cxUITweenHelper.ShowAlpha(initPanel, true, delay, param.tfunc, param.duration);
+                   return cxUITweenHelper.ShowAlpha(initPanel, true, delay, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             //case UIEffectType.LoopRotate:
@@ -317,43 +318,43 @@ public class cxUITweenPanel: MonoBehaviour {
     }
 
     private static Coroutine HideUIEffect(RectTransform rectT, UIEffectParam param, float delay,
-                                       Vector3 initPosition, Vector3 initScale, CanvasGroup initPanel)
+                                       Vector3 initPosition, Vector3 initScale, CanvasGroup initPanel, bool use_realtime)
     {
         switch (param.type)
         {
             case UITweenType.ShowFromLeft:
                 {
-                   return cxUITweenHelper.HideTo(cxUITweenHelper.MovingDir.Left, rectT, initPosition, delay, param.tfunc, param.duration);
+                   return cxUITweenHelper.HideTo(cxUITweenHelper.MovingDir.Left, rectT, initPosition, delay, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowFromRight:
                 {
-                   return cxUITweenHelper.HideTo(cxUITweenHelper.MovingDir.Right, rectT, initPosition, delay, param.tfunc, param.duration);
+                   return cxUITweenHelper.HideTo(cxUITweenHelper.MovingDir.Right, rectT, initPosition, delay, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowFromUp:
                 {
-                   return cxUITweenHelper.HideTo(cxUITweenHelper.MovingDir.Up, rectT, initPosition, delay, param.tfunc, param.duration);
+                   return cxUITweenHelper.HideTo(cxUITweenHelper.MovingDir.Up, rectT, initPosition, delay, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowFromDown:
                 {
-                  return  cxUITweenHelper.HideTo(cxUITweenHelper.MovingDir.Down, rectT, initPosition, delay, param.tfunc, param.duration);
+                  return  cxUITweenHelper.HideTo(cxUITweenHelper.MovingDir.Down, rectT, initPosition, delay, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowScaleX:
                 {
-                   return cxUITweenHelper.HideScale(rectT.gameObject, true, delay, true, false, param.tfunc, param.duration);
+                   return cxUITweenHelper.HideScale(rectT.gameObject, true, delay, true, false, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowScaleY:
                 {
-                   return cxUITweenHelper.HideScale(rectT.gameObject, true, delay, false, true, param.tfunc, param.duration);
+                   return cxUITweenHelper.HideScale(rectT.gameObject, true, delay, false, true, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowScaleXY:
                 {
-                   return cxUITweenHelper.HideScale(rectT.gameObject, true, delay, true, true, param.tfunc, param.duration);
+                   return cxUITweenHelper.HideScale(rectT.gameObject, true, delay, true, true, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             case UITweenType.ShowStamp:
@@ -363,7 +364,7 @@ public class cxUITweenPanel: MonoBehaviour {
                 break;
             case UITweenType.ShowAlpha:
                 {
-                   return cxUITweenHelper.HideAlpha(initPanel, true, delay, param.tfunc, param.duration);
+                   return cxUITweenHelper.HideAlpha(initPanel, true, delay, param.tfunc, param.duration, use_realtime);
                 }
                 break;
             default:

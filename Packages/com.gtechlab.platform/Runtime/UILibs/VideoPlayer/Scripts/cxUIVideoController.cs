@@ -312,7 +312,7 @@ public class cxUIVideoController : MonoBehaviour {
     }
 
     IEnumerator AutoHideControlPanel () {
-        yield return new WaitForSeconds (hideScreenControlTime);
+        yield return new WaitForSecondsRealtime (hideScreenControlTime);
         HideControlPanel ();
     }
 
