@@ -53,6 +53,28 @@ public class m9ExcelRowDataReader
         else
             outData = 0;
     }
+    
+    public void GetColumnLong(int seq, ref long outData)
+    {
+        long result;
+
+        if (long.TryParse(rowData[seq + offsetColumn], out result))
+            outData = result;
+        else
+            outData = 0;
+    }
+
+     public void GetColumnDouble(int seq, ref double outData)
+    {
+        double result;
+
+        if (double.TryParse(rowData[seq + offsetColumn], out result))
+            outData = result;
+        else
+            outData = 0;
+    }
+
+
 
     public void GetColumnFloat(int seq, ref float outData)
     {
