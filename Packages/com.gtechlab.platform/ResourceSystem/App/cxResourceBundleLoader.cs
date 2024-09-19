@@ -172,20 +172,18 @@ public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
 
     public bool HasCachedVersion (string resourceId, string hash) {
 
+#if !UNITY_WEBGL
+       
         string bundleName =  resourceId.Replace(".","_"); 
         var hash128 = Hash128.Parse (hash);
-
-        /*
-        int count = Caching.cacheCount;
-        List<string> cacheList = new List<string> ();
-        Caching.GetAllCachePaths (cacheList);
-        */
 
         List<Hash128> cachedVersions = new List<Hash128> ();
         Caching.GetCachedVersions (bundleName, cachedVersions);
         var cacheVersion = cachedVersions.Find (q => q.Equals (hash128));
 
         return cacheVersion.isValid;
+#endif
+        return false;
     }
 
     private async Task<AssetBundle> LoadBundle (string resourceId, string hash, Action<float> downloadState = null, CancellationToken? cancellationToken = null) {

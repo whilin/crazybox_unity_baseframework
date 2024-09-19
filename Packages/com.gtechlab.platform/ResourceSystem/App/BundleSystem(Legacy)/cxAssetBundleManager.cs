@@ -237,6 +237,7 @@ public class cxAssetBundleManager : MonoSingleton<cxAssetBundleManager> {
 
     public bool HasCachedVersion(string bundleName){
         
+#if !UNITY_WEBGL        
         var bundleDesc = bundleTable.Find( q => q.bundle == bundleName);
         if(bundleDesc == null) {
             return false;
@@ -249,6 +250,8 @@ public class cxAssetBundleManager : MonoSingleton<cxAssetBundleManager> {
         var cacheVersion = cachedVersions.Find(q => q.Equals(hash128));
 
         return cacheVersion.isValid;
+#endif
+        return false;
     }
 
 

@@ -156,6 +156,7 @@ public abstract partial class cxUIFrame : MonoBehaviour {
         foreach (var f in popupFrames) {
             f.Close ();
         }
+        popupFrames.Clear ();
 
         PopNavigate (this);
     }
@@ -171,6 +172,7 @@ public abstract partial class cxUIFrame : MonoBehaviour {
         {
             f.Close();
         }
+        popupFrames.Clear();
 
         PopNavigate(this);
     }
@@ -180,6 +182,7 @@ public abstract partial class cxUIFrame : MonoBehaviour {
         Hide ();
         foreach (var f in popupFrames)
             f.Close ();
+        popupFrames.Clear ();
 
         OnDeactivated ();
     }
