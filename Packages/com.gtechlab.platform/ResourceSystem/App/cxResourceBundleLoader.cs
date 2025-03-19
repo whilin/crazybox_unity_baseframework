@@ -7,7 +7,7 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class cxResourceBundleData {
+public class cxResourceBundleData  : IDisposable {
 
     public enum BundleLoadState {
         Unloaded,
@@ -41,6 +41,10 @@ public class cxResourceBundleData {
         dispose.Dispose ();
 
         return state.Value == BundleLoadState.Loaded;
+    }
+
+    public void Dispose(){
+        assetBundle?.Unload(true);
     }
 
     public bool IsReady {
@@ -88,6 +92,20 @@ public class cxResourceBundleLoader : cxSingleton<cxResourceBundleLoader> {
         cxResourceBundleLoader.Instance.resourceInfoRepository = resourceInfoRepository;
         cxResourceBundleLoader.Instance.resourceLocation = resourceLocation;
         cxResourceBundleLoader.Instance.platformName = cxResourceNaming.GetActivePlatformName ();
+    }
+
+    public async void ReleaseBundle(string resourceId){
+        cxResourceBundleData chunk;
+         lock (chunks) {
+            chunk = chunks.Find (q => q.resourceDesc.resourceId == resourceId);
+            if (chunk != null) {
+                chunks.Remove (chunk);
+            }
+        }
+
+        if(chunk != null){
+            chunk.Dispose ();
+        }
     }
 
     private async Task<cxResourceDescModel> FindResourceInfo (string resourceId) {
