@@ -405,7 +405,7 @@ public abstract partial class cxUIFrame : MonoBehaviour {
     #region  LifeCycle Event
 
     protected abstract void OnInit (); //!< 최초 시작 시점에 호출된다. 			
-    protected abstract void OnActivated (object showParam); //!< 시작후 Activated 될때 호출된다. OnInit 호출뒤에 곧바로 호출된다.
+    protected abstract void OnActivated (object frameArgs); //!< 시작후 Activated 될때 호출된다. OnInit 호출뒤에 곧바로 호출된다.
     protected abstract void OnDeactivated (); //!< Panel이 Disable될때 호출된다.
     protected virtual void OnBecomeInvisible () { }
     protected virtual void OnBecomeVisible () { }

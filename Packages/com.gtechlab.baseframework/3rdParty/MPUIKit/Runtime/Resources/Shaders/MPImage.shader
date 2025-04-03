@@ -69,9 +69,9 @@ Shader "MPUI/Procedural Image"
         
         _ColorMask ("Color Mask", Float) = 15
         
-              /* //SOFTMASK_HANDLE_START
+                 /* //SOFTMASK_HANDLE_START
          [PerRendererData] _SoftMask ("Mask", 2D) = "white" {}
-              */ //SOFTMASK_HANDLE_END
+                 */ //SOFTMASK_HANDLE_END
         
         [Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
     }
@@ -107,9 +107,9 @@ Shader "MPUI/Procedural Image"
             #include "UnityCG.cginc"
             #include "UnityUI.cginc"
             #include "2D_SDF.cginc"
-                  /* //SOFTMASK_HANDLE_START
-			#include "Assets/SoftMask/Shaders/SoftMask.cginc" //SOFTMASK_INCLUDE_HANDLE
-                  */ //SOFTMASK_HANDLE_END
+                     /* //SOFTMASK_HANDLE_START
+			#include "Packages/com.olegknyazev.softmask/Assets/Shaders/Resources/SoftMask.cginc" //SOFTMASK_INCLUDE_HANDLE
+                     */ //SOFTMASK_HANDLE_END
             
             
             #pragma multi_compile_local _ UNITY_UI_CLIP_RECT
@@ -120,9 +120,9 @@ Shader "MPUI/Procedural Image"
             #pragma multi_compile_local _ STROKE OUTLINED OUTLINED_STROKE
             #pragma multi_compile_local _ GRADIENT_LINEAR GRADIENT_RADIAL GRADIENT_CORNER
 
-                  /* //SOFTMASK_HANDLE_START
+                     /* //SOFTMASK_HANDLE_START
             #pragma multi_compile _ SOFTMASK_SIMPLE
-                  */ //SOFTMASK_HANDLE_END
+                     */ //SOFTMASK_HANDLE_END
             
             struct appdata_t
             {
@@ -145,9 +145,9 @@ Shader "MPUI/Procedural Image"
                 float4 worldPosition : TEXCOORD3;
 
 
-                      /* //SOFTMASK_HANDLE_START
+                         /* //SOFTMASK_HANDLE_START
                 SOFTMASK_COORDS(4)
-                      */ //SOFTMASK_HANDLE_END
+                         */ //SOFTMASK_HANDLE_END
                 
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -287,7 +287,7 @@ Shader "MPUI/Procedural Image"
                     half corners = max(max(max(cornerCircles.x, cornerCircles.y), cornerCircles.z), cornerCircles.w);
                     corners = max(corners, 0.0) * cornerMask;
 
-                    return 1-(rect*(1-cornerMask) + corners);
+                    return rect*(cornerMask-1) - corners;
                     /*
                     float2 _texcoord = _additionalData.xy;
                     float2 _size = float2(_additionalData.z, _additionalData.w);
@@ -392,11 +392,11 @@ Shader "MPUI/Procedural Image"
                     
                     // Bottom rounded corner
                     _PentagonTipRadius = max(_PentagonTipRadius, 0.001);
-                    half halfWidth = width / 2;
-                    half m = -_PentagonTipSize / halfWidth;
-                    half d = sqrt(1 + m * m);
-                    half c = _PentagonTipSize;
-                    half k = _PentagonTipRadius * d + _PentagonTipSize;
+                    float halfWidth = width / 2;
+                    float m = -_PentagonTipSize / halfWidth;
+                    float d = sqrt(1 + m * m);
+                    float c = _PentagonTipSize;
+                    float k = _PentagonTipRadius * d + _PentagonTipSize;
                     
                     half2 circlePivot = half2(halfWidth, m * halfWidth + k);
                     half cornerCircle = circle(_texcoord - circlePivot, _PentagonTipRadius);
@@ -448,13 +448,15 @@ Shader "MPUI/Procedural Image"
                     scale = width / _HexagonTipSize.y;
                     half rhombus2 = sdRhombus(_texcoord - float2(width - _HexagonTipSize.y * scale, height / 2.0), float2(_HexagonTipSize.y, height / 2.0) * scale);
                     half sdfHexagon = sdfDifference(sdfDifference(baseRect, -rhombus1), -rhombus2);
+
+                    
                     
                     //Left Rounded Corners
-                    half halfHeight = height / 2.0;
-                    half m = -halfHeight / _HexagonTipSize.x;
-                    half c = halfHeight;
-                    half d = sqrt(1.0 + m * m);
-                    half k = _HexagonTipRadius.x * d + c;
+                    float halfHeight = height / 2.0;
+                    float m = -halfHeight / _HexagonTipSize.x;
+                    float c = halfHeight;
+                    float d = sqrt(1.0 + m * m);
+                    float k = _HexagonTipRadius.x * d + c;
                     //middle
                     half2 circlePivot = half2((halfHeight - k) / m, halfHeight);
                     half cornerCircle = circle(_texcoord - circlePivot, _HexagonTipRadius.x);
@@ -462,6 +464,8 @@ Shader "MPUI/Procedural Image"
                     half y = m * x + c;
                     half fy = map(_texcoord.x, x, circlePivot.x, y, circlePivot.y);
                     sdfHexagon = _texcoord.y > fy && _texcoord.y < height - fy ? cornerCircle: sdfHexagon;
+
+                    //return sdfHexagon;
                     
                     //bottom
                     k = _HexagonCornerRadius.x * d + c;
@@ -470,7 +474,8 @@ Shader "MPUI/Procedural Image"
                     x = (circlePivot.y + circlePivot.x / m - c) / (m + 1.0 / m); y = m * x + c;
                     fy = map(_texcoord.x, x, circlePivot.x, y, circlePivot.y);
                     sdfHexagon = _texcoord.y < fy && _texcoord.x < circlePivot.x ? cornerCircle: sdfHexagon;
-                    
+
+                    //return sdfHexagon;
                     //top
                     k = _HexagonCornerRadius.w * d + c;
                     circlePivot = half2((_HexagonCornerRadius.w - k) / m, height - _HexagonCornerRadius.w);
@@ -478,7 +483,7 @@ Shader "MPUI/Procedural Image"
                     x = (_HexagonCornerRadius.w + circlePivot.x / m - c) / (m + 1.0 / m); y = m * x + c;
                     fy = map(_texcoord.x, x, circlePivot.x, height - y, circlePivot.y);
                     sdfHexagon = _texcoord.y > fy && _texcoord.x < circlePivot.x ? cornerCircle: sdfHexagon;
-                    
+                    //return sdfHexagon;
                     //Right Rounded Corners
                     m = halfHeight / _HexagonTipSize.y;
                     d = sqrt(1.0 + m * m);
@@ -491,7 +496,7 @@ Shader "MPUI/Procedural Image"
                     x = (circlePivot.y + circlePivot.x / m - c) / (m + 1.0 / m); y = m * x + c;
                     fy = map(_texcoord.x, circlePivot.x, x, circlePivot.y, y);
                     sdfHexagon = _texcoord.y > fy && _texcoord.y < height - fy ? cornerCircle: sdfHexagon;
-                    
+                    //return sdfHexagon;
                     //bottom
                     k = _HexagonCornerRadius.y * d + c;
                     circlePivot = half2((_HexagonCornerRadius.y - k) / m, _HexagonCornerRadius.y);
@@ -499,7 +504,7 @@ Shader "MPUI/Procedural Image"
                     x = (circlePivot.y + circlePivot.x / m - c) / (m + 1.0 / m); y = m * x + c;
                     fy = map(_texcoord.x, circlePivot.x, x, circlePivot.y, y);
                     sdfHexagon = _texcoord.y < fy && _texcoord.x > circlePivot.x ? cornerCircle: sdfHexagon;
-                    
+                    //return sdfHexagon;
                     //top
                     k = _HexagonCornerRadius.z * d + c;
                     circlePivot = half2((_HexagonCornerRadius.z - k) / m, height - _HexagonCornerRadius.z);
@@ -563,13 +568,13 @@ Shader "MPUI/Procedural Image"
                 OUT.color = v.color * _Color;
 
 
-                      /* //SOFTMASK_HANDLE_START
+                         /* //SOFTMASK_HANDLE_START
                 SOFTMASK_CALCULATE_COORDS(OUT, v.vertex);
-                      */ //SOFTMASK_HANDLE_END
+                         */ //SOFTMASK_HANDLE_END
                 return OUT;
             }
             
-            fixed4 frag(v2f IN): SV_Target
+            half4 frag(v2f IN): SV_Target
             {
                 half4 color = IN.color;
                 half2 texcoord = IN.texcoord;
@@ -659,9 +664,9 @@ Shader "MPUI/Procedural Image"
                     #endif
                 #endif
 
-                      /* //SOFTMASK_HANDLE_START
+                         /* //SOFTMASK_HANDLE_START
                 color.a *= SOFTMASK_GET_MASK(IN);
-                      */ //SOFTMASK_HANDLE_END
+                         */ //SOFTMASK_HANDLE_END
                 
                 #ifdef UNITY_UI_CLIP_RECT
                     color.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
@@ -671,7 +676,7 @@ Shader "MPUI/Procedural Image"
                     clip(color.a - 0.001);
                 #endif
                 
-                return fixed4(color);
+                return half4(color);
             }
             ENDCG
             

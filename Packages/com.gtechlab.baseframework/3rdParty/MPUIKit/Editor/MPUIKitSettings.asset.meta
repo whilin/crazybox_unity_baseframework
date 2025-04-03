@@ -6,3 +6,10 @@ NativeFormatImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 163041
+  packageName: Modern Procedural UI Kit
+  packageVersion: 1.2.2
+  assetPath: Packages/com.gtechlab.baseframework/3rdParty/MPUIKit/Editor/MPUIKitSettings.asset
+  uploadId: 681261

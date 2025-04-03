@@ -24,7 +24,7 @@ namespace MPUIKIT {
 
         [SerializeField] private float m_StrokeWidth;
         [SerializeField] private float m_OutlineWidth;
-        [SerializeField] private Color m_OutlineColor;
+        [SerializeField] private Color m_OutlineColor = Color.black;
         [SerializeField] private float m_FalloffDistance = 0.5f;
         [SerializeField] private bool m_ConstrainRotation = true;
         [SerializeField] private float m_ShapeRotation;
@@ -454,7 +454,7 @@ namespace MPUIKIT {
             Init();
         }
 
-        protected void Init()
+        public void Init()
         {
             InitializeComponents();
             FixAdditionalShaderChannelsInCanvas();

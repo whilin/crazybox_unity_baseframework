@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 546177621794a974cbee7e2628280bfa
+guid: 460821eee43c24d2d8a4016fac6c4e55
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -14,5 +14,5 @@ AssetOrigin:
   productId: 163041
   packageName: Modern Procedural UI Kit
   packageVersion: 1.2.2
-  assetPath: Packages/com.gtechlab.baseframework/3rdParty/MPUIKit/Runtime/Scripts/Enums.cs
+  assetPath: Packages/com.gtechlab.baseframework/3rdParty/MPUIKit/Demos/Scripts/DemoController.cs
   uploadId: 681261

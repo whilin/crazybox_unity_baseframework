@@ -13,9 +13,9 @@ Shader "MPUI/Basic Procedural Image"
         _ColorMask ("Color Mask", Float) = 15
         
         
-              /* //SOFTMASK_HANDLE_START
+                 /* //SOFTMASK_HANDLE_START
          [PerRendererData] _SoftMask ("Mask", 2D) = "white" {}
-              */ //SOFTMASK_HANDLE_END
+                 */ //SOFTMASK_HANDLE_END
         
         [Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
     }
@@ -51,9 +51,9 @@ Shader "MPUI/Basic Procedural Image"
             #include "UnityCG.cginc"
             #include "UnityUI.cginc"
             #include "2D_SDF.cginc"
-                  /* //SOFTMASK_HANDLE_START
-			#include "Assets/SoftMask/Shaders/SoftMask.cginc" //SOFTMASK_INCLUDE_HANDLE
-                  */ //SOFTMASK_HANDLE_END
+                     /* //SOFTMASK_HANDLE_START
+			#include "Packages/com.olegknyazev.softmask/Assets/Shaders/Resources/SoftMask.cginc" //SOFTMASK_INCLUDE_HANDLE
+                     */ //SOFTMASK_HANDLE_END
             
             #pragma multi_compile_local _ UNITY_UI_CLIP_RECT
             #pragma multi_compile_local _ UNITY_UI_ALPHACLIP
@@ -61,9 +61,9 @@ Shader "MPUI/Basic Procedural Image"
             #pragma multi_compile_local _ CIRCLE TRIANGLE RECTANGLE NSTAR_POLYGON
             #pragma multi_compile_local _ STROKE OUTLINED OUTLINED_STROKE
             
-                  /* //SOFTMASK_HANDLE_START
+                     /* //SOFTMASK_HANDLE_START
             #pragma multi_compile _ SOFTMASK_SIMPLE
-                  */ //SOFTMASK_HANDLE_END
+                     */ //SOFTMASK_HANDLE_END
             
             
             struct appdata_t
@@ -92,9 +92,9 @@ Shader "MPUI/Basic Procedural Image"
                 float4 worldPosition: TEXCOORD4;
 
                 
-                      /* //SOFTMASK_HANDLE_START
+                         /* //SOFTMASK_HANDLE_START
                 SOFTMASK_COORDS(5)
-                      */ //SOFTMASK_HANDLE_END
+                         */ //SOFTMASK_HANDLE_END
                 
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -134,7 +134,7 @@ Shader "MPUI/Basic Procedural Image"
                     corners = max(corners, 0.0) * cornerMask;
 
                     //return rect;
-                    return 1-(rect*(1-cornerMask) + corners);
+                    return rect*(cornerMask-1) - corners;
 
                     /*
                     half rect = rectanlge(_texcoord - half2(_size.x / 2.0, _size.y / 2.0), _size.x, _size.y);
@@ -148,7 +148,6 @@ Shader "MPUI/Basic Procedural Image"
                     rect = _texcoord.x < radius.w && _texcoord.y > _size.y - radius.w ? cornerCircle: rect;
                     */
                     
-                    return 1-corners;
                     //max(max(max(cornerCircles.x, cornerCircles.y), cornerCircles.z), cornerCircles.w);
                 }
             #endif
@@ -266,8 +265,8 @@ Shader "MPUI/Basic Procedural Image"
     
                 
                 float2 size = v.uv1;
-                half strokeWidth = v.uv2.x;
-                half falloff = v.uv2.y;
+                half strokeWidth = v.normal.y;
+                half falloff = v.normal.z;
                 
                 float rotationData = v.uv3.x;
                 half cornerStyle = v.uv3.y;
@@ -277,9 +276,9 @@ Shader "MPUI/Basic Procedural Image"
 
                 float4 shapeData;
                 #if CIRCLE
-                    shapeData.xy = v.normal.yz;
+                    shapeData.xy = v.uv2.xy;
                 #else
-                    shapeData = decode_0_1_16(v.normal.yz) * min(size.x, size.y);
+                    shapeData = decode_0_1_16(v.uv2) * min(size.x, size.y);
                 #endif
                 
                
@@ -323,9 +322,9 @@ Shader "MPUI/Basic Procedural Image"
                     OUT.vertex.xy += (_ScreenParams.zw - 1.0) * float2(-1.0, 1.0);
                 #endif
                 
-                      /* //SOFTMASK_HANDLE_START
+                         /* //SOFTMASK_HANDLE_START
                 SOFTMASK_CALCULATE_COORDS(OUT, v.vertex);
-                      */ //SOFTMASK_HANDLE_END
+                         */ //SOFTMASK_HANDLE_END
                 return OUT;
             }
             
@@ -389,9 +388,9 @@ Shader "MPUI/Basic Procedural Image"
                 #endif
 
 
-                      /* //SOFTMASK_HANDLE_START
+                         /* //SOFTMASK_HANDLE_START
                 color.a *= SOFTMASK_GET_MASK(IN);
-                      */ //SOFTMASK_HANDLE_END
+                         */ //SOFTMASK_HANDLE_END
                 
                 #ifdef UNITY_UI_CLIP_RECT
                     color.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);

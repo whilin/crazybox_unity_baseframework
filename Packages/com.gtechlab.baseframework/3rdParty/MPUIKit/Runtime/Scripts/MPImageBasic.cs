@@ -226,6 +226,10 @@ namespace MPUIKIT {
             set => Debug.LogWarning("Setting Material of MPImageBasic has no effect.");
         }
 
+        public override float preferredWidth => sprite == MPImageUtility.EmptySprite ? 0 : base.preferredWidth;
+        public override float preferredHeight => sprite == MPImageUtility.EmptySprite ? 0 : base.preferredHeight;
+
+
         protected override void OnEnable() {
             base.OnEnable();
             MPImageUtility.FixAdditionalShaderChannelsInCanvas(canvas);
@@ -278,15 +282,16 @@ namespace MPUIKIT {
             stream.RectTransform = rectT;
             Rect r = GetPixelAdjustedRect();
             stream.Uv1 = new Vector2(r.width + m_FalloffDistance, r.height + m_FalloffDistance);
-            stream.Uv2 = new Vector2(m_StrokeWidth, m_FalloffDistance);
             float packedRotData =
                 PackRotationData(m_ShapeRotation, m_ConstrainRotation, m_FlipHorizontal, m_FlipVertical);
             stream.Uv3 = new Vector2(packedRotData, (float)m_CornerStyle);
 
-            stream.Tangent = m_OutlineColor;
+            stream.Tangent = QualitySettings.activeColorSpace == ColorSpace.Linear? m_OutlineColor.linear : m_OutlineColor;
             Vector3 normal = new Vector3();
             normal.x = m_OutlineWidth;
-
+            normal.y = m_StrokeWidth;
+            normal.z = m_FalloffDistance;
+            
             Vector4 data;
             Vector2 shapeProps;
             switch (m_DrawShape) {
@@ -313,8 +318,8 @@ namespace MPUIKIT {
                     break;
             }
 
-            normal.y = shapeProps.x;
-            normal.z = shapeProps.y;
+            stream.Uv2 = shapeProps;
+            
             stream.Normal = normal;
             return stream;
         }
@@ -353,7 +358,13 @@ namespace MPUIKIT {
                 return ret;
             }
         }
-        
+
+        protected override void OnRectTransformDimensionsChange()
+        {
+            base.OnRectTransformDimensionsChange();
+            base.SetVerticesDirty();
+        }
+
         private Vector4 FixRadius(Vector4 radius)
         {
             Rect rect = rectTransform.rect;
