@@ -2,7 +2,6 @@
     "name": "com.crazybox.framework",
     "rootNamespace": "",
     "references": [
-        "GUID:338e0e55ea28747e38343ee00d53fd0a",
         "GUID:07fb4c5fa774f4449a412c415f5d8101",
         "GUID:560b04d1a97f54a4e82edc0cbbb69285",
         "GUID:f06555f75b070af458a003d92f9efb00",
