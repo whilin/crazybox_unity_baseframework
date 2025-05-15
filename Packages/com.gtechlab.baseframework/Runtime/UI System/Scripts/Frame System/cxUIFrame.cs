@@ -64,6 +64,7 @@ public abstract partial class cxUIFrame : MonoBehaviour {
     protected ManagedPanel[] m_managedPanels;
     private bool m_show = false;
     public bool IsActive { get { return m_show; } }
+    public FrameType FrameTypeName { get => m_frameType; }
 
     private List<cxUIFrame> popupFrames = new List<cxUIFrame> ();
 

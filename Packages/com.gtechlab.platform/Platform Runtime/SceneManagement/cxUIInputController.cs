@@ -6,19 +6,36 @@ using UnityEngine.UI;
 [DefaultExecutionOrder (-99)]
 public class cxUIInputController : MonoSingleton<cxUIInputController> {
 
+
+    [SerializeField]
+    private Vector2 referenceResolution = new Vector2 (1920, 1080);
+
     [SerializeField]
     private bool clickAtLongPress = true;
 
     private GameObject focused {  get;  set; }
 
+
+
+    bool OnMouseDown => Input.GetMouseButtonDown (0) || Input.GetMouseButtonDown (1);
+    bool OnMouseUp => Input.GetMouseButtonUp (0) || Input.GetMouseButtonUp (1);
+    int MouseButtonID => Input.GetMouseButton (0) ? 0 : Input.GetMouseButton (1) ? 1 : -1;
+    
+    public bool IsLeftButton => mouseButton == 0;
+    public bool IsRightButton => mouseButton == 1;
+    public bool IsLongPress => pressTime > 1.0f;
+    
     public Vector2? ScreenClickedThisFrame { get; private set; }
     public Vector2? PressedDragDeltaThisFrame { get; private set; }
     public Vector2? ScrollDeltaThisFrame { get; private set; }
 
-    public bool IsLeftButton => mouseButton == 0;
-    public bool IsRightButton => mouseButton == 1;
-    public bool IsLongPress => pressTime > 1.0f;
-
+    public Vector2? PressedDragNormalizedDeltaThisFrame { get {
+        if(PressedDragDeltaThisFrame.HasValue) {
+            return GetNormalizedPosition(PressedDragDeltaThisFrame.Value);
+        }
+        return null;
+    } }
+    
     Vector3? beginPosition;
     Vector3? lastPosition;
     bool mouseDragged;
@@ -44,6 +61,13 @@ public class cxUIInputController : MonoSingleton<cxUIInputController> {
             selectedObject.GetComponent<InputField> () != null ||
             selectedObject.GetComponent<TMP_InputField> () != null
         );
+    }
+
+    public Vector2 GetNormalizedPosition(Vector2 position) {
+        float refX = (float) referenceResolution.x / Screen.width;
+        float refY = (float) referenceResolution.y / Screen.height;
+
+        return new Vector2(position.x * refX, position.y * refY);
     }
 
     void Update () {
@@ -106,8 +130,5 @@ public class cxUIInputController : MonoSingleton<cxUIInputController> {
         }
     }
 
-    bool OnMouseDown => Input.GetMouseButtonDown (0) || Input.GetMouseButtonDown (1);
-    bool OnMouseUp => Input.GetMouseButtonUp (0) || Input.GetMouseButtonUp (1);
-    int MouseButtonID => Input.GetMouseButton (0) ? 0 : Input.GetMouseButton (1) ? 1 : -1;
 
 }

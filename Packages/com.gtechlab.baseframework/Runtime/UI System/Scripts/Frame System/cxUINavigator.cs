@@ -5,8 +5,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class cxUINavigator : MonoSingleton<cxUINavigator> {
+
     [SerializeField]
     private Canvas rootCanvas;
+
+    [SerializeField]
+    private List<cxUIFrame> preOpenFrames;
 
     [SerializeField]
     private List<cxUIFrame> prefabs;
@@ -17,9 +21,50 @@ public class cxUINavigator : MonoSingleton<cxUINavigator> {
         base.Awake ();
 
         frames = new List<cxUIFrame> ();
-        foreach (var p in prefabs) {
+
+        foreach (var p in preOpenFrames) {
+            var type = p.GetType ();
+            var prevFrame = frames.Find (q => q.GetType () == type);
+            if (prevFrame != null) {
+                Debug.LogError ("PreOpenFrame already exists frame:" + prevFrame.name + " type:" + type);
+                continue;
+            }
+
             var frame = PrefabCreateUGUI<cxUIFrame> (p, rootCanvas.gameObject);
             frames.Add (frame);
+        }
+
+        foreach (var p in prefabs) {
+            var type = p.GetType ();
+            var prevFrame = frames.Find (q => q.GetType () == type);
+            if (prevFrame != null) {
+                Debug.LogError ("Prefab already exists frame:" + prevFrame.name + " type:" + type);
+                continue;
+            }
+            var frame = PrefabCreateUGUI<cxUIFrame> (p, rootCanvas.gameObject);
+            frames.Add (frame);
+        }
+    }
+
+    void Start () {
+        foreach (var p in preOpenFrames) {
+            var type = p.GetType ();
+            var frame = frames.Find (q => q.GetType () == type);
+            if (frame == null) {
+                Debug.LogError ("PreOpenedFrame not found type:" + type);
+                continue;
+            }
+
+            if (p.FrameTypeName == cxUIFrame.FrameType.Dialog) {
+                cxUIContext context = new cxUIContext (null);
+                frame.PushPopup (context, null);
+            } else if (p.FrameTypeName == cxUIFrame.FrameType.Aux) {
+                cxUIContext context = new cxUIContext (null);
+                frame.Push (context, null);
+            } else {
+                cxUIContext context = new cxUIContext (null);
+                frame.Push (context, null);
+            }
         }
     }
 
@@ -58,9 +103,9 @@ public class cxUINavigator : MonoSingleton<cxUINavigator> {
             cxUIFrame.ActiveFrame.Pop ();
     }
 
-    public void PopAllFrames(){
-        while(cxUIFrame.ActiveFrame){
-            cxUIFrame.ActiveFrame.Pop();
+    public void PopAllFrames () {
+        while (cxUIFrame.ActiveFrame) {
+            cxUIFrame.ActiveFrame.Pop ();
         }
     }
 
@@ -86,38 +131,32 @@ public class cxUINavigator : MonoSingleton<cxUINavigator> {
             cxUIFrame.ActiveFrame?.ActivePopup.Pop ();
     }
 
-    
-    private static T PrefabCreateUGUI<T>(T prefabobj, GameObject prefabparentobj) where T : MonoBehaviour
-    {
-        try
-        {
-            T prefab = (T)GameObject.Instantiate(prefabobj);
+    private static T PrefabCreateUGUI<T> (T prefabobj, GameObject prefabparentobj) where T : MonoBehaviour {
+        try {
+            T prefab = (T) GameObject.Instantiate (prefabobj);
             if (prefab == null) return null;
 
             prefab.name = prefabobj.name;
 
             GameObject parent = prefabparentobj;
-            if (parent != null)
-            {
-                prefab.transform.SetParent(parent.transform);
+            if (parent != null) {
+                prefab.transform.SetParent (parent.transform);
                 //prefab.transform.Translate(parent.transform.position);
             }
 
-            var rectT = prefab.GetComponent<RectTransform>();
+            var rectT = prefab.GetComponent<RectTransform> ();
             //Ah-hoc, Jongok
-            rectT.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-            rectT.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+            rectT.localScale = new Vector3 (1.0f, 1.0f, 1.0f);
+            rectT.localPosition = new Vector3 (0.0f, 0.0f, 0.0f);
 
-			rectT.anchorMin = new Vector2(0,0);
-			rectT.anchorMax = new Vector2(1,1);
-			rectT.offsetMin = new Vector2(0,0);
-			rectT.offsetMax = new Vector2(0,0);
+            rectT.anchorMin = new Vector2 (0, 0);
+            rectT.anchorMax = new Vector2 (1, 1);
+            rectT.offsetMin = new Vector2 (0, 0);
+            rectT.offsetMax = new Vector2 (0, 0);
 
             return prefab;
-        }
-        catch (System.Exception ex)
-        {
-            Debug.Log("PrefabCreate except : " + ex.Message);
+        } catch (System.Exception ex) {
+            Debug.Log ("PrefabCreate except : " + ex.Message);
         }
         return null;
     }
